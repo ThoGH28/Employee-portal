@@ -1,0 +1,93 @@
+.adminContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.adminContainer :global(.ant-tabs) {
+    font-family: 'Inter', sans-serif;
+}
+
+.adminContainer :global(.ant-tabs-nav) {
+    margin-bottom: 24px !important;
+    padding: 0 4px;
+}
+
+.adminContainer :global(.ant-tabs-tab) {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    padding: 12px 8px !important;
+    transition: color var(--transition-base) !important;
+}
+
+.adminContainer :global(.ant-tabs-tab-active) {
+    font-weight: 700 !important;
+}
+
+.adminContainer :global(.ant-tabs-ink-bar) {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6) !important;
+    height: 3px !important;
+    border-radius: 2px !important;
+}
+
+.adminContainer :global(.ant-card) {
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid rgba(99, 102, 241, 0.08) !important;
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.06) !important;
+    transition: box-shadow 0.25s ease, transform 0.25s ease !important;
+    animation: fadeInUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.adminContainer :global(.ant-card:hover) {
+    box-shadow: 0 8px 28px rgba(99, 102, 241, 0.1) !important;
+    transform: translateY(-2px);
+}
+
+.adminContainer :global(.ant-card-head) {
+    font-weight: 700;
+    font-family: 'Manrope', sans-serif;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.08);
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #fafbff 0%, #fff 100%);
+}
+
+.adminContainer :global(.ant-card-body) {
+    padding: 24px;
+}
+
+.adminContainer :global(.ant-upload) {
+    margin-bottom: 0;
+}
+
+.adminContainer :global(.ant-btn) {
+    border-radius: var(--radius-sm) !important;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .adminContainer {
+        padding: 0;
+    }
+
+    .adminContainer :global(.ant-tabs-tab) {
+        font-size: 13px !important;
+        padding: 10px 4px !important;
+    }
+
+    .adminContainer :global(.ant-card-head),
+    .adminContainer :global(.ant-card-body) {
+        padding: 16px;
+    }
+}

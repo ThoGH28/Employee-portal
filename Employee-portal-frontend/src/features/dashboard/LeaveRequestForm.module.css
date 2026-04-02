@@ -1,0 +1,292 @@
+/* ── Leave Request Page ─────────────────────────────────────────── */
+.leaveContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: fadeInUp 0.45s ease both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Page Header ────────────────────────────────────────────────── */
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--brand-gray-100);
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.pageHeader h1 {
+    font-size: 28px;
+    font-weight: 800;
+    font-family: 'Manrope', sans-serif;
+    letter-spacing: -0.04em;
+    color: var(--brand-black);
+    margin-bottom: 5px;
+}
+
+.pageHeader p {
+    font-size: 14px;
+    color: var(--brand-gray-400);
+    margin: 0;
+}
+
+/* ── Balance Card ───────────────────────────────────────────────── */
+.balanceCard {
+    background: var(--brand-white);
+    border-radius: 16px !important;
+    border: 1px solid var(--brand-gray-100) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+    overflow: hidden;
+    transition: box-shadow 0.22s ease !important;
+}
+
+.balanceCard:hover {
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.09) !important;
+}
+
+.balanceCard :global(.ant-card-head) {
+    font-weight: 700;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    border-bottom: 1px solid var(--brand-gray-100);
+    background: var(--brand-gray-50);
+    padding: 16px 24px;
+    min-height: unset;
+}
+
+.balanceCard :global(.ant-card-body) {
+    padding: 24px;
+}
+
+/* ── Balance Stats Row ──────────────────────────────────────────── */
+.balanceStats {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+}
+
+.balanceStat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 32px 0 0;
+    position: relative;
+}
+
+.balanceStat+.balanceStat {
+    padding-left: 32px;
+    border-left: 1.5px solid var(--brand-gray-100);
+}
+
+.balanceStat span:first-child {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--brand-gray-400);
+}
+
+.balanceStat span:last-child {
+    font-size: 26px;
+    font-weight: 800;
+    font-family: 'Manrope', sans-serif;
+    color: var(--brand-black);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+}
+
+.balanceStat span:last-child small {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--brand-gray-400);
+    margin-left: 3px;
+    letter-spacing: 0;
+}
+
+.balanceActions {
+    margin-left: auto;
+}
+
+/* Primary CTA button */
+.btnRequest {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: var(--brand-white);
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13.5px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.18s, box-shadow 0.18s, transform 0.15s;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+}
+
+.btnRequest:hover {
+    opacity: 0.9;
+    box-shadow: 0 6px 22px rgba(99, 102, 241, 0.5);
+    transform: translateY(-1px);
+}
+
+.btnRequest:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+/* ── Requests Card / Table ──────────────────────────────────────── */
+.requestsCard {
+    background: var(--brand-white);
+    border-radius: 16px !important;
+    border: 1px solid var(--brand-gray-100) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+    overflow: hidden;
+    transition: box-shadow 0.22s ease !important;
+}
+
+.requestsCard:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07) !important;
+}
+
+.requestsCard :global(.ant-card-head) {
+    font-weight: 700;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    border-bottom: 1px solid var(--brand-gray-100);
+    padding: 16px 24px;
+    min-height: unset;
+}
+
+.requestsCard :global(.ant-card-body) {
+    padding: 0;
+}
+
+/* Tighten up Ant table inside card */
+.requestsCard :global(.ant-table-thead > tr > th) {
+    background: var(--brand-gray-50) !important;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--brand-gray-400) !important;
+    padding: 14px 20px !important;
+    border-bottom: 1px solid var(--brand-gray-100) !important;
+}
+
+.requestsCard :global(.ant-table-tbody > tr > td) {
+    padding: 14px 20px !important;
+    font-size: 13.5px;
+    color: var(--brand-gray-700);
+    border-bottom: 1px solid var(--brand-gray-50) !important;
+    transition: background 0.15s;
+}
+
+.requestsCard :global(.ant-table-tbody > tr:hover > td) {
+    background: var(--brand-gray-50) !important;
+}
+
+.requestsCard :global(.ant-table-tbody > tr:last-child > td) {
+    border-bottom: none !important;
+}
+
+/* ── Status badges ──────────────────────────────────────────────── */
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: capitalize;
+}
+
+.statusApproved {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--brand-emerald);
+}
+
+.statusRejected {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--brand-rose);
+}
+
+.statusPending {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--brand-amber);
+}
+
+/* ── Modal ──────────────────────────────────────────────────────── */
+.modalFormItem :global(.ant-form-item-label > label) {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--brand-gray-700);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .pageHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pageHeader h1 {
+        font-size: 22px;
+    }
+
+    .balanceStats {
+        gap: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .balanceStat {
+        padding: 0 !important;
+        border-left: none !important;
+        border-top: 1.5px solid var(--brand-gray-100);
+        padding-top: 16px !important;
+        width: 100%;
+    }
+
+    .balanceStat:first-child {
+        border-top: none;
+        padding-top: 0 !important;
+    }
+
+    .balanceActions {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .btnRequest {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .balanceCard :global(.ant-card-body) {
+        padding: 18px;
+    }
+}

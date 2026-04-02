@@ -1,0 +1,595 @@
+/* ═══════════════════════════════════════════════════════════════
+   PAYSLIP — Premium Refined UI
+   Aesthetic: Editorial finance — clean, authoritative, data-dense
+   but never cold. Warm whites, precise spacing, confident type.
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Page container ─────────────────────────────────────────────── */
+.payslipList {
+    padding: 0 0 56px;
+    animation: pageIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Page header ─────────────────────────────────────────────────── */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--brand-gray-100);
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.headerLeft h1 {
+    font-size: 30px;
+    font-weight: 800;
+    font-family: 'Manrope', sans-serif;
+    letter-spacing: -0.04em;
+    color: var(--brand-black);
+    margin-bottom: 6px;
+    line-height: 1.15;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.headerLeft h1 .titleIcon {
+    width: 40px;
+    height: 40px;
+    background: var(--brand-black);
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-white);
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+.headerLeft p {
+    font-size: 14px;
+    color: var(--brand-gray-400);
+    margin: 0;
+    font-weight: 450;
+    padding-left: 52px;
+    /* align under title text */
+}
+
+/* ── Summary bar (3 quick-stat pills) ──────────────────────────── */
+.summaryBar {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.summaryPill {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    background: var(--brand-white);
+    border: 1.5px solid var(--brand-gray-100);
+    border-radius: 12px;
+    padding: 10px 16px;
+    min-width: 110px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.summaryPill:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.09);
+    border-color: var(--brand-gray-200);
+    transform: translateY(-1px);
+}
+
+.summaryPill span:first-child {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--brand-gray-400);
+    margin-bottom: 3px;
+}
+
+.summaryPill span:last-child {
+    font-size: 15px;
+    font-weight: 800;
+    font-family: 'Manrope', sans-serif;
+    letter-spacing: -0.02em;
+    color: var(--brand-black);
+}
+
+.summaryPill.accent span:last-child {
+    color: var(--brand-emerald);
+}
+
+/* ── Table card wrapper ──────────────────────────────────────────── */
+.tableCard {
+    background: var(--brand-white);
+    border-radius: 18px;
+    border: 1px solid var(--brand-gray-100);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 16px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    transition: box-shadow 0.25s ease;
+}
+
+.tableCard:hover {
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.08);
+}
+
+/* Ant table overrides inside card */
+.tableCard :global(.ant-table) {
+    background: transparent;
+}
+
+.tableCard :global(.ant-table-thead > tr > th) {
+    background: var(--brand-gray-50) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: var(--brand-gray-400) !important;
+    padding: 14px 20px !important;
+    border-bottom: 1px solid var(--brand-gray-100) !important;
+    white-space: nowrap;
+}
+
+.tableCard :global(.ant-table-tbody > tr > td) {
+    padding: 15px 20px !important;
+    font-size: 13.5px;
+    color: var(--brand-gray-700);
+    border-bottom: 1px solid var(--brand-gray-50) !important;
+    transition: background 0.14s;
+    vertical-align: middle;
+}
+
+.tableCard :global(.ant-table-tbody > tr:hover > td) {
+    background: #f9f9fb !important;
+}
+
+.tableCard :global(.ant-table-tbody > tr:last-child > td) {
+    border-bottom: none !important;
+}
+
+.tableCard :global(.ant-pagination) {
+    padding: 14px 20px;
+    margin: 0 !important;
+    border-top: 1px solid var(--brand-gray-100);
+}
+
+/* ── Net salary in table ─────────────────────────────────────────── */
+.netSalary {
+    font-weight: 800;
+    font-family: 'Manrope', sans-serif;
+    color: var(--brand-emerald);
+    font-size: 14.5px;
+    letter-spacing: -0.015em;
+}
+
+/* ── Status badges ──────────────────────────────────────────────── */
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.statusPublished {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--brand-emerald);
+}
+
+.statusDraft {
+    background: rgba(156, 163, 175, 0.15);
+    color: var(--brand-gray-500);
+}
+
+.statusArchived {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--brand-rose);
+}
+
+/* ── Action buttons in table ─────────────────────────────────────── */
+.actionBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.16s, box-shadow 0.16s, transform 0.14s;
+    border: none;
+    font-family: inherit;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.actionBtnPrimary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: var(--brand-white);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.actionBtnPrimary:hover {
+    opacity: 0.9;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45);
+    transform: translateY(-1px);
+}
+
+.actionBtnSecondary {
+    background: var(--brand-white);
+    color: var(--brand-gray-700);
+    border: 1.5px solid var(--brand-gray-200) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.actionBtnSecondary:hover {
+    background: var(--brand-gray-50);
+    border-color: var(--brand-gray-300) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.actionBtnSecondary:active,
+.actionBtnPrimary:active {
+    transform: translateY(0);
+}
+
+/* ── Empty state ─────────────────────────────────────────────────── */
+.emptyState {
+    padding: 72px 40px;
+    text-align: center;
+}
+
+.emptyIcon {
+    width: 64px;
+    height: 64px;
+    background: var(--brand-gray-100);
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--brand-gray-400);
+    margin-bottom: 18px;
+}
+
+.emptyTitle {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Manrope', sans-serif;
+    color: var(--brand-black);
+    margin-bottom: 6px;
+}
+
+.emptyDesc {
+    font-size: 13.5px;
+    color: var(--brand-gray-400);
+}
+
+/* ── Loading state ───────────────────────────────────────────────── */
+.loadingState {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 80px 40px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PAYSLIP DETAIL MODAL
+════════════════════════════════════════════════════════════════ */
+
+.payslipDetails {
+    padding: 0;
+}
+
+/* Month + status row */
+.detailHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: var(--brand-gray-50);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid var(--brand-gray-100);
+}
+
+.detailHeader h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    font-family: 'Manrope', sans-serif;
+    letter-spacing: -0.03em;
+    color: var(--brand-black);
+}
+
+/* Two-col grid for earnings / deductions */
+.detailsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+/* Section card */
+.section {
+    background: var(--brand-white);
+    padding: 20px;
+    border-radius: 14px;
+    border: 1px solid var(--brand-gray-100);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s;
+}
+
+.section:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+}
+
+.sectionLabel {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--brand-gray-400);
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sectionLabel::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.earningsLabel::before {
+    background: var(--brand-emerald);
+}
+
+.deductionsLabel::before {
+    background: var(--brand-rose);
+}
+
+/* Individual detail rows */
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--brand-gray-50);
+    font-size: 13.5px;
+}
+
+.detailRow:last-child {
+    border-bottom: none;
+}
+
+.detailRow span:first-child {
+    color: var(--brand-gray-500);
+    font-weight: 450;
+}
+
+.detailRow span:last-child {
+    font-weight: 650;
+    color: var(--brand-gray-800);
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+}
+
+/* Total row (subtotal at bottom of section) */
+.detailRowTotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 16px;
+    background: var(--brand-gray-50);
+    border-radius: 8px;
+    margin: 12px -4px 0;
+    font-size: 13.5px;
+}
+
+.detailRowTotal span:first-child {
+    font-weight: 600;
+    color: var(--brand-gray-600);
+}
+
+.detailRowTotal span:last-child {
+    font-weight: 800;
+    font-size: 15px;
+    font-family: 'Manrope', sans-serif;
+    color: var(--brand-black);
+    letter-spacing: -0.02em;
+}
+
+/* ── Net salary hero strip ──────────────────────────────────────── */
+.netSalarySection {
+    background: var(--brand-black);
+    border-radius: 14px;
+    padding: 28px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle texture */
+.netSalarySection::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 80% 50%, rgba(255, 255, 255, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 80%, rgba(255, 255, 255, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.netSalaryLeft h3 {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.55);
+    margin: 0 0 6px;
+}
+
+.netSalaryAmount {
+    font-size: 36px;
+    font-weight: 900;
+    font-family: 'Manrope', sans-serif;
+    letter-spacing: -0.04em;
+    color: var(--brand-white);
+    line-height: 1;
+}
+
+.netSalaryRight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.netSalaryRight small {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.netSalaryTakehome {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+}
+
+/* ── Modal overrides ─────────────────────────────────────────────── */
+.modalFooterBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.16s, box-shadow 0.16s, transform 0.14s;
+    border: none;
+    font-family: inherit;
+}
+
+.modalFooterBtnClose {
+    background: var(--brand-gray-100);
+    color: var(--brand-gray-700);
+    border: 1.5px solid var(--brand-gray-200) !important;
+}
+
+.modalFooterBtnClose:hover {
+    background: var(--brand-gray-200);
+    transform: translateY(-1px);
+}
+
+.modalFooterBtnDownload {
+    background: var(--brand-black);
+    color: var(--brand-white);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modalFooterBtnDownload:hover {
+    background: var(--brand-gray-800);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+    }
+
+    .headerLeft h1 {
+        font-size: 22px;
+    }
+
+    .headerLeft p {
+        padding-left: 0;
+        margin-top: 6px;
+    }
+
+    .summaryBar {
+        width: 100%;
+    }
+
+    .summaryPill {
+        flex: 1;
+        align-items: center;
+        min-width: 80px;
+    }
+
+    .detailsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .netSalarySection {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 22px 20px;
+    }
+
+    .netSalaryRight {
+        align-items: flex-start;
+    }
+
+    .netSalaryAmount {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .headerLeft h1 {
+        font-size: 20px;
+        gap: 8px;
+    }
+
+    .titleIcon {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 15px !important;
+        border-radius: 9px !important;
+    }
+
+    .summaryPill span:last-child {
+        font-size: 13px;
+    }
+}

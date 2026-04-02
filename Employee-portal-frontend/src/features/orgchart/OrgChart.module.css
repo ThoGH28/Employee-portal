@@ -1,0 +1,282 @@
+/* ─── Google Font import (add to index.html or global CSS) ───────────────────
+   @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Page shell ─────────────────────────────────────────────────────────── */
+.orgChartPage {
+    padding: 0;
+    font-family: 'DM Sans', sans-serif;
+    animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.header {
+    margin-bottom: 36px;
+    position: relative;
+}
+
+.header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: -0.03em;
+    color: var(--brand-gray-900, #0f172a);
+}
+
+/* Accent rule under the title */
+.header h1::after {
+    content: '';
+    display: block;
+    height: 3px;
+    width: 40px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--brand-blue, #3b82f6), #818cf8);
+    margin-left: 4px;
+    align-self: flex-end;
+    margin-bottom: 4px;
+}
+
+.header p {
+    font-size: 14px;
+    color: var(--brand-gray-500, #64748b);
+    margin: 0;
+    letter-spacing: 0.01em;
+}
+
+/* ── Filter bar ──────────────────────────────────────────────────────────── */
+.filterBar {
+    margin-bottom: 24px;
+}
+
+/* ── Department badges ───────────────────────────────────────────────────── */
+.departmentStats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+}
+
+.deptBadge {
+    padding: 7px 16px;
+    background: transparent;
+    border: 1.5px solid var(--brand-gray-200, #e2e8f0);
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--brand-gray-500, #64748b);
+    cursor: pointer;
+    transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease,
+        box-shadow 0.18s ease, transform 0.14s ease;
+    user-select: none;
+    letter-spacing: 0.01em;
+}
+
+.deptBadge:hover {
+    border-color: var(--brand-blue, #3b82f6);
+    color: var(--brand-blue, #3b82f6);
+    background: var(--brand-blue-light, #eff6ff);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.14);
+}
+
+.deptBadgeActive {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-color: #6366f1;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+}
+
+.deptBadgeActive:hover {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* ── Chart viewport ──────────────────────────────────────────────────────── */
+.chartContainer {
+    overflow-x: auto;
+    padding: 32px 24px 40px;
+    background: linear-gradient(160deg, #f8fafc 0%, #f1f5fd 100%);
+    border-radius: 20px;
+    border: 1px solid var(--brand-gray-200, #e2e8f0);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+    min-height: 260px;
+}
+
+.orgTree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ── Node card ───────────────────────────────────────────────────────────── */
+.nodeCard {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 22px 16px;
+    background: #fff;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 18px;
+    min-width: 172px;
+    max-width: 200px;
+    text-align: center;
+    cursor: default;
+    position: relative;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.22s ease, border-color 0.2s ease;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06),
+        0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+/* Subtle top highlight stripe */
+.nodeCard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, transparent 40%);
+}
+
+.nodeCard:hover {
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 8px 28px rgba(99, 102, 241, 0.16),
+        0 2px 8px rgba(15, 23, 42, 0.06);
+    transform: translateY(-4px) scale(1.02);
+}
+
+.nodeCard h4 {
+    margin: 10px 0 3px 0;
+    font-family: 'Syne', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--brand-gray-900, #0f172a);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+}
+
+.nodeCard p {
+    margin: 0 0 6px 0;
+    font-size: 12px;
+    color: var(--brand-gray-500, #64748b);
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.nodeCard small {
+    color: var(--brand-gray-400, #94a3b8);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+/* ── Connectors ──────────────────────────────────────────────────────────── */
+.connector {
+    width: 2px;
+    height: 28px;
+    background: linear-gradient(180deg, #cbd5e1, #e2e8f0);
+    margin: 0 auto;
+    border-radius: 1px;
+}
+
+.childrenContainer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 0;
+    position: relative;
+}
+
+/* Horizontal bridge line above children */
+.childrenContainer::before {
+    content: '';
+    position: absolute;
+    top: -14px;
+    /* span from centre of first to centre of last child — JS-free approx */
+    left: calc(50% - 100px);
+    right: calc(50% - 100px);
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #cbd5e1 15%, #cbd5e1 85%, transparent);
+    border-radius: 1px;
+}
+
+/* Vertical drop from bridge to each child */
+.branchItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.branchItem::before {
+    content: '';
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 14px;
+    background: linear-gradient(180deg, #cbd5e1, #e2e8f0);
+    border-radius: 1px;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.emptyChart {
+    text-align: center;
+    padding: 60px 0;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 22px;
+    }
+
+    .chartContainer {
+        padding: 20px 12px 28px;
+        border-radius: 14px;
+    }
+
+    .nodeCard {
+        min-width: 148px;
+        padding: 16px 14px 12px;
+        border-radius: 14px;
+    }
+
+    .nodeCard h4 {
+        font-size: 12.5px;
+    }
+
+    .departmentStats {
+        gap: 6px;
+    }
+
+    .deptBadge {
+        padding: 5px 12px;
+        font-size: 12px;
+    }
+
+    .childrenContainer {
+        gap: 12px;
+    }
+}

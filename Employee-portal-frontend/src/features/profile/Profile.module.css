@@ -1,0 +1,473 @@
+/* ═══════════════════════════════════════════════════════════════
+   PROFILE — Premium Employee Portal UI
+   Aesthetic: Warm editorial — authoritative identity card meets
+   refined form design. Dark hero banner, clean section cards.
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Page container ─────────────────────────────────────────────── */
+.profilePage {
+    padding: 0 0 64px;
+    animation: pageIn 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Page header ─────────────────────────────────────────────────── */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 32px;
+    padding-bottom: 26px;
+    border-bottom: 1px solid var(--brand-gray-100);
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.headerLeft h1 {
+    font-size: 30px;
+    font-weight: 800;
+    font-family: 'Manrope', sans-serif;
+    letter-spacing: -0.04em;
+    color: var(--brand-black);
+    margin-bottom: 6px;
+    line-height: 1.15;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.headerLeft h1 .titleIcon {
+    width: 40px;
+    height: 40px;
+    background: var(--brand-black);
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-white);
+    font-size: 18px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+.headerLeft p {
+    font-size: 14px;
+    color: var(--brand-gray-400);
+    margin: 0;
+    padding-left: 52px;
+    font-weight: 450;
+}
+
+/* ── Save button ─────────────────────────────────────────────────── */
+.btnSave {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 22px;
+    background: var(--brand-black);
+    color: var(--brand-white);
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13.5px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.18s, box-shadow 0.18s, transform 0.15s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+}
+
+.btnSave:hover {
+    background: var(--brand-gray-800);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px);
+}
+
+.btnSave:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+.btnSave:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Identity hero card ──────────────────────────────────────────── */
+.heroCard {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #312e81 80%, #1e293b 100%);
+    background-size: 200% 200%;
+    animation: hero-aurora 10s ease infinite, pageIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+    border-radius: 22px;
+    padding: 34px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.45), 0 8px 20px rgba(99, 102, 241, 0.2);
+}
+
+@keyframes hero-aurora {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Subtle texture overlay */
+.heroCard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 85% 30%, rgba(129, 140, 248, 0.2) 0%, transparent 55%),
+        radial-gradient(ellipse at 15% 80%, rgba(192, 132, 252, 0.12) 0%, transparent 45%);
+    pointer-events: none;
+    animation: breathe 6s ease-in-out infinite;
+}
+
+@keyframes breathe {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Decorative circle */
+.heroCard::after {
+    content: '';
+    position: absolute;
+    right: -60px;
+    top: -60px;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(129, 140, 248, 0.15);
+    animation: spin-slow 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes spin-slow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Avatar in hero */
+.heroAvatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 800;
+    font-family: 'Manrope', sans-serif;
+    color: var(--brand-white);
+    letter-spacing: -0.02em;
+    flex-shrink: 0;
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.heroInfo {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.heroInfo h2 {
+    font-size: 24px;
+    font-weight: 800;
+    font-family: 'Manrope', sans-serif;
+    letter-spacing: -0.035em;
+    color: var(--brand-white);
+    margin: 0 0 6px;
+    line-height: 1.2;
+}
+
+.heroMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.heroPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 11px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 0.01em;
+}
+
+.heroPill svg {
+    font-size: 11px;
+    opacity: 0.75;
+}
+
+.heroId {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+/* ── Section cards ───────────────────────────────────────────────── */
+.sectionCard {
+    background: var(--brand-white);
+    border-radius: 18px;
+    border: 1px solid rgba(99, 102, 241, 0.08);
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    padding: 26px 28px;
+    margin-bottom: 20px;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+    animation: pageIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    position: relative;
+    overflow: hidden;
+}
+
+.sectionCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #c084fc);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sectionCard:hover {
+    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+.sectionCard:hover::before {
+    transform: scaleX(1);
+}
+
+.sectionCard:nth-child(1) {
+    animation-delay: 0.10s;
+}
+
+.sectionCard:nth-child(2) {
+    animation-delay: 0.16s;
+}
+
+.sectionCard:nth-child(3) {
+    animation-delay: 0.22s;
+}
+
+.sectionCard:nth-child(4) {
+    animation-delay: 0.28s;
+}
+
+.sectionCard:nth-child(5) {
+    animation-delay: 0.34s;
+}
+
+/* Section heading */
+.sectionTitle {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Manrope', sans-serif;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--brand-gray-400);
+    margin: 0 0 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--brand-gray-100);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sectionTitle .sectionIcon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: var(--brand-gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--brand-gray-500);
+}
+
+/* ── Read-only fields ────────────────────────────────────────────── */
+.readOnlyField {
+    background: var(--brand-gray-50) !important;
+    border-color: var(--brand-gray-100) !important;
+    color: var(--brand-gray-600) !important;
+    cursor: default !important;
+    font-weight: 500 !important;
+}
+
+.readOnlyField:hover {
+    border-color: var(--brand-gray-100) !important;
+}
+
+/* ── Ant Form label overrides ────────────────────────────────────── */
+.sectionCard :global(.ant-form-item-label > label) {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--brand-gray-400);
+}
+
+.sectionCard :global(.ant-input),
+.sectionCard :global(.ant-input-affix-wrapper),
+.sectionCard :global(.ant-input-textarea textarea) {
+    border-radius: 9px;
+    font-size: 13.5px;
+    padding: 9px 13px;
+    border-color: var(--brand-gray-200);
+    transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.sectionCard :global(.ant-input:focus),
+.sectionCard :global(.ant-input-affix-wrapper:focus),
+.sectionCard :global(.ant-input-textarea textarea:focus) {
+    border-color: var(--brand-black) !important;
+    box-shadow: 0 0 0 2.5px rgba(0, 0, 0, 0.08) !important;
+}
+
+.sectionCard :global(.ant-input:hover:not(:disabled)),
+.sectionCard :global(.ant-input-textarea textarea:hover:not(:disabled)) {
+    border-color: var(--brand-gray-400) !important;
+}
+
+.sectionCard :global(.ant-form-item) {
+    margin-bottom: 18px;
+}
+
+/* ── Footer action bar ───────────────────────────────────────────── */
+.footerBar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding-top: 8px;
+}
+
+.footerHint {
+    font-size: 12.5px;
+    color: var(--brand-gray-400);
+    font-weight: 450;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+
+    .headerLeft h1 {
+        font-size: 22px;
+    }
+
+    .headerLeft p {
+        padding-left: 0;
+        margin-top: 6px;
+    }
+
+    .btnSave {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+    }
+
+    .heroCard {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 24px 20px;
+        gap: 18px;
+        border-radius: 16px;
+    }
+
+    .heroCard::after {
+        display: none;
+    }
+
+    .heroInfo h2 {
+        font-size: 20px;
+    }
+
+    .sectionCard {
+        padding: 20px 18px;
+    }
+
+    .footerBar {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .footerHint {
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .heroAvatar {
+        width: 72px;
+        height: 72px;
+        font-size: 22px;
+        border-radius: 18px;
+    }
+
+    .heroInfo h2 {
+        font-size: 18px;
+    }
+
+    .heroPill {
+        font-size: 11px;
+    }
+}
