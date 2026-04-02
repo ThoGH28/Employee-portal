@@ -1,0 +1,318 @@
+/* ── Container ──────────────────────────────────────────────────── */
+.container {
+    padding: 0 0 56px;
+    animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 32px 36px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #14532d 100%);
+    background-size: 200% 200%;
+    animation: aurora 8s ease infinite, fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.5), 0 8px 20px rgba(20, 83, 45, 0.25);
+    margin-bottom: 24px;
+}
+
+@keyframes aurora {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(74, 222, 128, 0.25) 0%, transparent 65%);
+    animation: pulseOrb 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes pulseOrb {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+}
+
+.headerContent {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.headerIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(74, 222, 128, 0.2);
+    backdrop-filter: blur(8px);
+    font-size: 26px;
+    color: #86efac;
+    flex-shrink: 0;
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* ── KPI Cards ──────────────────────────────────────────────────── */
+.kpiRow {
+    margin-bottom: 24px;
+}
+
+.kpiCard {
+    border-radius: 18px !important;
+    border: 1px solid #f1f5f9 !important;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06) !important;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+}
+
+.kpiCard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1) !important;
+}
+
+.kpiInner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 0;
+}
+
+.kpiIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.kpiText {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Tabs ───────────────────────────────────────────────────────── */
+.tabs {
+    background: #fff;
+    border-radius: 20px;
+    padding: 8px 24px 24px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f1f5f9;
+}
+
+.tabs :global(.ant-tabs-nav) {
+    margin-bottom: 20px !important;
+}
+
+.tabs :global(.ant-tabs-tab) {
+    font-size: 14px !important;
+    padding: 10px 16px !important;
+    border-radius: 10px !important;
+    transition: all 0.2s;
+}
+
+.tabs :global(.ant-tabs-tab:hover) {
+    background: #f8fafc !important;
+}
+
+.tabs :global(.ant-tabs-tab-active) {
+    background: #f0fdf4 !important;
+}
+
+/* ── Section cards ──────────────────────────────────────────────── */
+.sectionCard {
+    border-radius: 16px !important;
+    border: 1px solid #f1f5f9 !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* ── Bar chart ──────────────────────────────────────────────────── */
+.barChart {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 4px 0;
+}
+
+.barRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.barLabel {
+    width: 140px;
+    flex-shrink: 0;
+    font-size: 13px;
+    color: #475569;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.barTrack {
+    flex: 1;
+    height: 10px;
+    background: #f1f5f9;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.barFill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.barValue {
+    width: 52px;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    text-align: right;
+}
+
+/* ── Trend chart ────────────────────────────────────────────────── */
+.trendChart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 160px;
+    padding: 8px 0 0;
+}
+
+.trendBar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.trendFill {
+    width: 100%;
+    max-width: 40px;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+    min-height: 4px;
+    transition: height 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.trendLabel {
+    font-size: 11px;
+    color: #94a3b8;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.trendValue {
+    font-size: 11px;
+    color: #334155;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* ── Status row ─────────────────────────────────────────────────── */
+.statusGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px;
+}
+
+.statusItem {
+    background: #f8fafc;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    border: 1px solid #f1f5f9;
+    transition: background 0.2s;
+}
+
+.statusItem:hover {
+    background: #f0fdf4;
+}
+
+.statusCount {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.statusDesc {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 24px 20px;
+    }
+
+    .barLabel {
+        width: 90px;
+    }
+
+    .trendChart {
+        height: 120px;
+    }
+}

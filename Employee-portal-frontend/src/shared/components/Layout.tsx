@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from 'react'
 import { Layout, Menu, Dropdown, Avatar, Button, Space } from 'antd'
-import { LogoutOutlined, UserOutlined, SettingOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DollarOutlined, FileTextOutlined, TeamOutlined, ApartmentOutlined, FileProtectOutlined, SolutionOutlined, DashboardOutlined, BarChartOutlined } from '@ant-design/icons'
+import { LogoutOutlined, UserOutlined, SettingOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DollarOutlined, FileTextOutlined, TeamOutlined, ApartmentOutlined, FileProtectOutlined, SolutionOutlined, DashboardOutlined, BarChartOutlined, QuestionCircleOutlined, CalendarOutlined } from '@ant-design/icons'
 import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../context/store'
 import { getInitials } from '../utils/helpers'
@@ -19,11 +19,14 @@ const allSidebarItems = [
     { key: 'dashboard', label: 'Trang chủ', icon: <DashboardOutlined />, visKey: 'dashboard' as const },
     { key: 'profile', label: 'Hồ sơ cá nhân', icon: <SolutionOutlined />, visKey: 'profile' as const },
     { key: 'payslips', label: 'Phiếu lương', icon: <DollarOutlined />, visKey: 'payslips' as const },
+    { key: 'leave', label: 'Nghỉ phép', icon: <CalendarOutlined />, visKey: 'dashboard' as const },
     { key: 'requests', label: 'Yêu cầu', icon: <FileProtectOutlined />, visKey: 'requests' as const },
+    { key: 'leave-approval', label: 'Duyệt Nghỉ Phép', icon: <CalendarOutlined />, visKey: 'leaveApproval' as const },
     { key: 'org-chart', label: 'Sơ đồ tổ chức', icon: <ApartmentOutlined />, visKey: 'orgChart' as const },
     { key: 'documents', label: 'Tài liệu', icon: <FileTextOutlined />, visKey: 'documents' as const },
     { key: 'reports', label: 'Báo cáo', icon: <BarChartOutlined />, visKey: 'reports' as const },
     { key: 'admin', label: 'Quản trị', icon: <TeamOutlined />, visKey: 'admin' as const },
+    { key: 'help', label: 'Hướng dẫn', icon: <QuestionCircleOutlined />, visKey: 'help' as const },
 ]
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {

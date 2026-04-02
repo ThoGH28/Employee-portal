@@ -76,7 +76,11 @@ export const useListEmployees = (page = 1, limit = 20): UseQueryResult<any> => {
 export const useMyLeaveRequests = (): UseQueryResult<LeaveRequest[]> => {
   return useQuery({
     queryKey: ["leaves", "my-requests"],
-    queryFn: () => leaveService.getMyLeaveRequests().then((res) => res.data),
+    queryFn: () =>
+      leaveService.getMyLeaveRequests().then((res) => {
+        const d = res.data as any;
+        return (Array.isArray(d) ? d : (d.results ?? [])) as LeaveRequest[];
+      }),
     staleTime: 1000 * 60 * 5,
   });
 };
@@ -96,7 +100,44 @@ export const useLeaveBalance = (): UseQueryResult<any> => {
   return useQuery({
     queryKey: ["leaves", "balance"],
     queryFn: () => leaveService.getLeaveBalance().then((res) => res.data),
-    staleTime: 1000 * 60 * 10,
+    staleTime: 0,
+  });
+};
+
+export const useAllLeaveRequests = (params?: {
+  status?: string;
+  leave_type?: string;
+}): UseQueryResult<LeaveRequest[]> => {
+  return useQuery({
+    queryKey: ["leaves", "all", params],
+    queryFn: () =>
+      leaveService.getAllLeaveRequests(params).then((res) => {
+        const d = res.data as any;
+        return (Array.isArray(d) ? d : (d.results ?? [])) as LeaveRequest[];
+      }),
+    staleTime: 1000 * 60 * 2,
+  });
+};
+
+export const useApproveLeaveRequest = (): UseMutationResult<
+  any,
+  Error,
+  any
+> => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { status: "approved" | "rejected"; approval_comment: string };
+    }) => leaveService.approveLeaveRequest(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leaves"] });
+      queryClient.invalidateQueries({ queryKey: ["leaves", "balance"] });
+    },
   });
 };
 
@@ -132,6 +173,21 @@ export const useAdminUpdateEmployee = (): UseMutationResult<
 
   return useMutation({
     mutationFn: ({ id, data }) => employeeService.adminUpdateEmployee(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+    },
+  });
+};
+
+export const useCreateEmployee = (): UseMutationResult<
+  any,
+  Error,
+  Record<string, any>
+> => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => employeeService.createEmployee(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
     },

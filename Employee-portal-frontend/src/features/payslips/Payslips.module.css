@@ -193,9 +193,9 @@
     text-transform: uppercase;
 }
 
-.statusPublished {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--brand-emerald);
+.statusFinalized {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--brand-blue, #3b82f6);
 }
 
 .statusDraft {
@@ -203,9 +203,9 @@
     color: var(--brand-gray-500);
 }
 
-.statusArchived {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--brand-rose);
+.statusDistributed {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--brand-emerald);
 }
 
 /* ── Action buttons in table ─────────────────────────────────────── */

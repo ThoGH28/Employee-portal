@@ -23,10 +23,16 @@ export const employeeService = {
 
   adminUpdateEmployee: (id: string, data: Record<string, any>) =>
     api.patch<Employee>(`/employees/profiles/${id}/admin-update/`, data),
+
+  createEmployee: (data: Record<string, any>) =>
+    api.post<Employee>("/employees/profiles/create_employee/", data),
 };
 
 export const leaveService = {
   getMyLeaveRequests: () => api.get<LeaveRequest[]>("/employees/leave/"),
+
+  getAllLeaveRequests: (params?: { status?: string; leave_type?: string }) =>
+    api.get<LeaveRequest[]>("/employees/leave/", { params }),
 
   createLeaveRequest: (data: LeaveRequestPayload) =>
     api.post<LeaveRequest>("/employees/leave/", data),
@@ -35,6 +41,11 @@ export const leaveService = {
     api.patch<LeaveRequest>(`/employees/leave/${id}/`, data),
 
   cancelLeaveRequest: (id: string) => api.delete(`/employees/leave/${id}/`),
+
+  approveLeaveRequest: (
+    id: string,
+    data: { status: "approved" | "rejected"; approval_comment: string },
+  ) => api.post<LeaveRequest>(`/employees/leave/${id}/approve/`, data),
 
   getLeaveBalance: () =>
     api.get<{ total: number; used: number; remaining: number }>(

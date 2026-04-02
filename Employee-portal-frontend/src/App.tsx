@@ -10,6 +10,7 @@ import { canViewReports } from './shared/utils/permissions'
 import { LoginPage } from './features/auth/LoginPage'
 import { Dashboard } from './features/dashboard/Dashboard'
 import { LeaveRequestForm } from './features/dashboard/LeaveRequestForm'
+import { LeaveApproval } from './features/leave/LeaveApproval'
 import { DocumentSearch } from './features/documents/DocumentSearch'
 import PayslipList from './features/payslips/PayslipList'
 import { AdminPanel } from './features/admin/AdminPanel'
@@ -17,6 +18,7 @@ import { Profile } from './features/profile/Profile'
 import { AdminRequests } from './features/requests/AdminRequests'
 import { OrgChart } from './features/orgchart/OrgChart'
 import { Reports } from './features/reports/Reports'
+import { UserManual } from './features/help/UserManual'
 import { queryClient } from './config/queryClient'
 import antdTheme from './shared/styles/theme'
 
@@ -48,6 +50,7 @@ export const App: React.FC = () => {
                         >
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/leave" element={<LeaveRequestForm />} />
+                            <Route path="/leave-approval" element={<LeaveApproval />} />
                             <Route path="/documents" element={<DocumentSearch />} />
                             <Route path="/payslips" element={<PayslipList />} />
                             <Route path="/profile" element={<Profile />} />
@@ -61,6 +64,7 @@ export const App: React.FC = () => {
                                     </RoleRoute>
                                 }
                             />
+                            <Route path="/help" element={<UserManual />} />
                             <Route
                                 path="/admin"
                                 element={

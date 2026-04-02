@@ -94,6 +94,8 @@ export interface SidebarVisibility {
   documents: boolean;
   admin: boolean;
   reports: boolean;
+  leaveApproval: boolean;
+  help: boolean;
 }
 
 export const getSidebarVisibility = (user: User | null): SidebarVisibility => {
@@ -107,6 +109,8 @@ export const getSidebarVisibility = (user: User | null): SidebarVisibility => {
       documents: false,
       admin: false,
       reports: false,
+      leaveApproval: false,
+      help: false,
     };
   }
 
@@ -119,16 +123,18 @@ export const getSidebarVisibility = (user: User | null): SidebarVisibility => {
     documents: true,
     admin: false,
     reports: false,
+    leaveApproval: false,
+    help: true,
   };
 
   if (user.role === "admin") {
-    return { ...base, admin: true, reports: true };
+    return { ...base, admin: true, reports: true, leaveApproval: true };
   }
   if (user.role === "hr") {
-    return { ...base, reports: true };
+    return { ...base, reports: true, leaveApproval: true };
   }
   if (user.is_department_manager) {
-    return { ...base, reports: true };
+    return { ...base, reports: true, leaveApproval: true };
   }
   // Regular employee
   return base;

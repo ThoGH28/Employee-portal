@@ -59,12 +59,20 @@ export interface Employee {
 // Leave request types
 export interface LeaveRequest {
   id: string;
-  employee_id: string;
+  employee: string;
+  employee_name: string;
+  leave_type: string;
   start_date: string;
   end_date: string;
   reason: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "cancelled";
+  approved_by?: string;
+  approved_by_name?: string;
+  approval_date?: string;
+  approval_comment?: string;
+  days_count: number;
   created_at: string;
+  updated_at: string;
 }
 
 export interface LeaveRequestPayload {

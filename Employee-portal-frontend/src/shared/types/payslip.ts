@@ -15,7 +15,7 @@ export interface Payslip {
   gross_salary: number;
   total_deductions: number;
   net_salary: number;
-  status: "draft" | "published" | "archived";
+  status: "draft" | "finalized" | "distributed";
   pdf_file?: string;
   created_by?: string;
   created_by_name?: string;

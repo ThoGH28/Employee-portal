@@ -109,18 +109,72 @@
     transform: translateY(-1px);
 }
 
+/* ── Zoom controls ───────────────────────────────────────────────────────── */
+.zoomControls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+
+.zoomControls button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--brand-gray-200, #e2e8f0);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--brand-gray-600, #475569);
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.zoomControls button:hover {
+    background: var(--brand-blue-light, #eff6ff);
+    border-color: var(--brand-blue, #3b82f6);
+    color: var(--brand-blue, #3b82f6);
+}
+
+.zoomLabel {
+    min-width: 44px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brand-gray-500, #64748b);
+    user-select: none;
+}
+
 /* ── Chart viewport ──────────────────────────────────────────────────────── */
 .chartContainer {
-    overflow-x: auto;
+    overflow: hidden;
     padding: 32px 24px 40px;
     background: linear-gradient(160deg, #f8fafc 0%, #f1f5fd 100%);
     border-radius: 20px;
     border: 1px solid var(--brand-gray-200, #e2e8f0);
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
-    min-height: 260px;
+    min-height: 400px;
+    cursor: grab;
+    touch-action: none;
+}
+
+.chartContainer:active {
+    cursor: grabbing;
 }
 
 .orgTree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: center top;
+    will-change: transform;
+    padding: 20px 40px 60px;
+}
+
+/* ── Node wrapper (column: card → connector → children) ──────────────── */
+.nodeWrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -190,54 +244,57 @@
     margin-top: 2px;
 }
 
-/* ── Connectors ──────────────────────────────────────────────────────────── */
-.connector {
+/* ── Connectors — clean straight lines only ─────────────────────────────── */
+
+/* Vertical line going DOWN from parent card center */
+.connectorDown {
     width: 2px;
-    height: 28px;
-    background: linear-gradient(180deg, #cbd5e1, #e2e8f0);
+    height: 24px;
+    background: #94a3b8;
     margin: 0 auto;
-    border-radius: 1px;
 }
 
-.childrenContainer {
+/* Vertical line going UP from horizontal rail into child */
+.connectorUp {
+    width: 2px;
+    height: 24px;
+    background: #94a3b8;
+    margin: 0 auto;
+}
+
+/* Row of children */
+.childrenRow {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    margin-top: 0;
     position: relative;
 }
 
-/* Horizontal bridge line above children */
-.childrenContainer::before {
-    content: '';
-    position: absolute;
-    top: -14px;
-    /* span from centre of first to centre of last child — JS-free approx */
-    left: calc(50% - 100px);
-    right: calc(50% - 100px);
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #cbd5e1 15%, #cbd5e1 85%, transparent);
-    border-radius: 1px;
-}
-
-/* Vertical drop from bridge to each child */
-.branchItem {
+/* Each child branch column */
+.childBranch {
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
+    padding: 0 14px;
 }
 
-.branchItem::before {
-    content: '';
+/* Horizontal line — each child draws its half towards the centre.
+   Middle children draw full width; first child only right half; last child only left half. */
+.hLine {
     position: absolute;
-    top: -14px;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #94a3b8;
+}
+
+.hLineFirst {
     left: 50%;
-    transform: translateX(-50%);
-    width: 2px;
-    height: 14px;
-    background: linear-gradient(180deg, #cbd5e1, #e2e8f0);
-    border-radius: 1px;
+}
+
+.hLineLast {
+    right: 50%;
 }
 
 /* ── Empty state ─────────────────────────────────────────────────────────── */
@@ -276,7 +333,7 @@
         font-size: 12px;
     }
 
-    .childrenContainer {
-        gap: 12px;
+    .childBranch {
+        padding: 0 8px;
     }
 }

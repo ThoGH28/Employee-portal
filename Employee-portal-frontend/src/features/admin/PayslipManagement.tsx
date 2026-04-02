@@ -17,7 +17,9 @@ import { UploadOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs';
 import styles from './PayslipManagement.module.css';
 import { payslipService } from '../../shared/services/payslipService';
+import { employeeService } from '../../shared/services/employeeService';
 import type { Payslip } from '../../shared/types/payslip';
+import type { Employee } from '../../shared/types';
 
 const PayslipManagement: React.FC = () => {
   const [form] = Form.useForm();
@@ -30,6 +32,12 @@ const PayslipManagement: React.FC = () => {
     queryFn: payslipService.getPayslips,
   });
 
+  const { data: employeesData } = useQuery({
+    queryKey: ['employeeList'],
+    queryFn: () => employeeService.listEmployees(1, 1000).then((r) => r.data),
+  });
+  const employees: Employee[] = employeesData?.results ?? [];
+
   const createMutation = useMutation({
     mutationFn: (data: any) => payslipService.createPayslip(data),
     onSuccess: () => {
@@ -39,8 +47,13 @@ const PayslipManagement: React.FC = () => {
       form.resetFields();
       setFileList([]);
     },
-    onError: () => {
-      message.error('Tạo phiếu lương thất bại');
+    onError: (err: any) => {
+      const data = err?.response?.data;
+      if (data?.non_field_errors) {
+        message.error('Nhân viên này đã có phiếu lương trong tháng được chọn.');
+      } else {
+        message.error('Tạo phiếu lương thất bại');
+      }
     },
   });
 
@@ -111,7 +124,7 @@ const PayslipManagement: React.FC = () => {
   const handleSubmit = async (values: any) => {
     const payload = {
       ...values,
-      month_year: values.month_year.format('YYYY-MM'),
+      month_year: values.month_year.format('YYYY-MM-01'),
       pdf_file: fileList.length > 0 ? fileList[0].originFileObj : undefined,
     };
 
@@ -210,10 +223,18 @@ const PayslipManagement: React.FC = () => {
         <Form form={form} onFinish={handleSubmit} layout="vertical">
           <Form.Item
             name="employee"
-            label="Mã Nhân viên"
-            rules={[{ required: true, message: 'Vui lòng nhập mã nhân viên' }]}
+            label="Nhân viên"
+            rules={[{ required: true, message: 'Vui lòng chọn nhân viên' }]}
           >
-            <InputNumber placeholder="Nhập mã nhân viên" />
+            <Select
+              showSearch
+              placeholder="Chọn nhân viên"
+              optionFilterProp="label"
+              options={employees.map((emp) => ({
+                value: emp.id,
+                label: `${emp.user?.first_name ?? ''} ${emp.user?.last_name ?? ''} (${emp.employee_id})`.trim(),
+              }))}
+            />
           </Form.Item>
 
           <Form.Item
@@ -307,8 +328,8 @@ const PayslipManagement: React.FC = () => {
             <Select
               options={[
                 { label: 'Nháp', value: 'draft' },
-                { label: 'Đã xuất bản', value: 'published' },
-                { label: 'Lưu trữ', value: 'archived' },
+                { label: 'Đã hoàn tất', value: 'finalized' },
+                { label: 'Đã phát', value: 'distributed' },
               ]}
             />
           </Form.Item>

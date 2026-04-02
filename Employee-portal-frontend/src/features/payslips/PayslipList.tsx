@@ -8,7 +8,6 @@ import {
     DotChartOutlined,
     CheckCircleFilled,
     ClockCircleFilled,
-    CloseCircleFilled,
 } from '@ant-design/icons';
 import styles from './Payslips.module.css';
 import { payslipService } from '../../shared/services/payslipService';
@@ -21,9 +20,9 @@ const fmt = (v: number) => `₫${v.toLocaleString('vi-VN')}`;
 /* ── Status Badge ────────────────────────────────────────────────── */
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
     const map: Record<string, { cls: string; icon: React.ReactNode }> = {
-        published: { cls: styles.statusPublished, icon: <CheckCircleFilled style={{ fontSize: 10 }} /> },
+        finalized: { cls: styles.statusFinalized, icon: <CheckCircleFilled style={{ fontSize: 10 }} /> },
         draft: { cls: styles.statusDraft, icon: <ClockCircleFilled style={{ fontSize: 10 }} /> },
-        archived: { cls: styles.statusArchived, icon: <CloseCircleFilled style={{ fontSize: 10 }} /> },
+        distributed: { cls: styles.statusDistributed, icon: <CheckCircleFilled style={{ fontSize: 10 }} /> },
     };
     const cfg = map[status] ?? { cls: styles.statusDraft, icon: null };
     return (
@@ -150,10 +149,10 @@ const PayslipList: React.FC = () => {
     /* Summary stats */
     const summary = useMemo(() => {
         if (!payslips?.length) return null;
-        const published = payslips.filter((p) => p.status === 'published');
-        const latest = published[0]?.net_salary ?? 0;
-        const avg = published.length
-            ? Math.round(published.reduce((s, p) => s + p.net_salary, 0) / published.length)
+        const distributed = payslips.filter((p) => p.status === 'distributed');
+        const latest = distributed[0]?.net_salary ?? 0;
+        const avg = distributed.length
+            ? Math.round(distributed.reduce((s, p) => s + p.net_salary, 0) / distributed.length)
             : 0;
         return { total: payslips.length, latest, avg };
     }, [payslips]);
