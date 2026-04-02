@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: employee-portal-backend
+    env: python
+    plan: free
+    rootDir: Employee-portal
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DB_ENGINE
+        value: "django.db.backends.postgresql"
+      - key: DB_NAME
+        fromDatabase:
+          name: employee-portal-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: employee-portal-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: employee-portal-db
+          property: password
+      - key: DB_HOST
+        fromDatabase:
+          name: employee-portal-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: employee-portal-db
+          property: port
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://employee-portal.pages.dev"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
+databases:
+  - name: employee-portal-db
+    plan: free
