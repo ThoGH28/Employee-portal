@@ -199,6 +199,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 <Menu
                     theme="dark"
                     mode="inline"
+                    inlineCollapsed={collapsed}
                     selectedKeys={[currentKey]}
                     openKeys={collapsed ? [] : openKeys}
                     onOpenChange={(keys) => { if (!collapsed) setOpenKeys(keys) }}
