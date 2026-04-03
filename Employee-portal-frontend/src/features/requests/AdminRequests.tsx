@@ -11,20 +11,7 @@ import type { AdministrativeRequest } from '../../shared/types/adminRequest';
 import { formatDate } from '../../shared/utils/helpers';
 import { useAuthStore } from '../../shared/context/store';
 import styles from './AdminRequests.module.css';
-
-const REQUEST_TYPE_OPTIONS = [
-    { value: 'employment_verification', label: 'Xác nhận công tác' },
-    { value: 'card_replacement', label: 'Cấp lại thẻ' },
-    { value: 'salary_certificate', label: 'Giấy xác nhận lương' },
-    { value: 'experience_letter', label: 'Giấy xác nhận kinh nghiệm' },
-    { value: 'other', label: 'Khác' },
-];
-
-const PRIORITY_OPTIONS = [
-    { value: 'low', label: 'Thấp' },
-    { value: 'medium', label: 'Trung bình' },
-    { value: 'high', label: 'Cao' },
-];
+import { useI18n } from '../../shared/context/i18n';
 
 const statusColorMap: Record<string, string> = {
     pending: 'orange',
@@ -41,6 +28,9 @@ const priorityColorMap: Record<string, string> = {
 };
 
 export const AdminRequests: React.FC = () => {
+    const t = useI18n();
+    const REQUEST_TYPE_OPTIONS = Object.entries(t.requests.requestTypes).map(([value, label]) => ({ value, label }));
+    const PRIORITY_OPTIONS = Object.entries(t.requests.priorities).map(([value, label]) => ({ value, label }));
     const { user } = useAuthStore();
     const queryClient = useQueryClient();
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
@@ -61,13 +51,13 @@ export const AdminRequests: React.FC = () => {
     const createMutation = useMutation({
         mutationFn: adminRequestService.createRequest,
         onSuccess: () => {
-            message.success('Tạo yêu cầu thành công');
+            message.success(t.requests.createSuccess);
             queryClient.invalidateQueries({ queryKey: ['admin-requests'] });
             setIsCreateModalVisible(false);
             createForm.resetFields();
         },
         onError: () => {
-            message.error('Tạo yêu cầu thất bại');
+            message.error(t.requests.createError);
         },
     });
 
@@ -75,13 +65,13 @@ export const AdminRequests: React.FC = () => {
         mutationFn: ({ id, data }: { id: string; data: { status: string; admin_comment: string } }) =>
             adminRequestService.processRequest(id, data),
         onSuccess: () => {
-            message.success('Xử lý yêu cầu thành công');
+            message.success(t.requests.processSuccess);
             queryClient.invalidateQueries({ queryKey: ['admin-requests'] });
             setIsProcessModalVisible(false);
             processForm.resetFields();
         },
         onError: () => {
-            message.error('Xử lý yêu cầu thất bại');
+            message.error(t.requests.processError);
         },
     });
 
@@ -107,19 +97,19 @@ export const AdminRequests: React.FC = () => {
 
     const columns = [
         {
-            title: 'Tiêu đề',
+            title: t.requests.colTitle,
             dataIndex: 'title',
             key: 'title',
             ellipsis: true,
         },
         {
-            title: 'Loại',
+            title: t.requests.colType,
             dataIndex: 'request_type_display',
             key: 'request_type',
             width: 180,
         },
         {
-            title: 'Độ ưu tiên',
+            title: t.requests.colPriority,
             dataIndex: 'priority',
             key: 'priority',
             width: 100,
@@ -133,7 +123,7 @@ export const AdminRequests: React.FC = () => {
             ),
         },
         {
-            title: 'Trạng thái',
+            title: t.requests.colStatus,
             dataIndex: 'status',
             key: 'status',
             width: 130,
@@ -148,14 +138,14 @@ export const AdminRequests: React.FC = () => {
         },
         ...(isHrOrAdmin
             ? [{
-                title: 'Nhân viên',
+                title: t.requests.colEmployee,
                 dataIndex: 'employee_name',
                 key: 'employee_name',
                 width: 150,
             }]
             : []),
         {
-            title: 'Ngày tạo',
+            title: t.requests.colCreated,
             dataIndex: 'created_at',
             key: 'created_at',
             width: 120,
@@ -166,7 +156,7 @@ export const AdminRequests: React.FC = () => {
             ),
         },
         {
-            title: 'Thao tác',
+            title: t.requests.colActions,
             key: 'actions',
             width: 180,
             render: (_: unknown, record: AdministrativeRequest) => (
@@ -180,7 +170,7 @@ export const AdminRequests: React.FC = () => {
                             setIsDetailModalVisible(true);
                         }}
                     >
-                        Xem
+                        {t.requests.btnView}
                     </Button>
                     {isHrOrAdmin && record.status !== 'completed' && record.status !== 'rejected' && (
                         <Button
@@ -191,7 +181,7 @@ export const AdminRequests: React.FC = () => {
                                 setIsProcessModalVisible(true);
                             }}
                         >
-                            Xử lý
+                            {t.requests.btnProcess}
                         </Button>
                     )}
                 </Space>
@@ -204,8 +194,8 @@ export const AdminRequests: React.FC = () => {
             {/* Header */}
             <div className={styles.header}>
                 <div>
-                    <h1><FileProtectOutlined /> Yêu cầu Hành chính</h1>
-                    <p>{isHrOrAdmin ? 'Quản lý tất cả yêu cầu của nhân viên' : 'Gửi và theo dõi yêu cầu của bạn'}</p>
+                    <h1><FileProtectOutlined /> {t.requests.pageTitle}</h1>
+                    <p>{isHrOrAdmin ? t.requests.descAdmin : t.requests.descEmployee}</p>
                 </div>
                 {!isHrOrAdmin && (
                     <Button
@@ -215,7 +205,7 @@ export const AdminRequests: React.FC = () => {
                         className={styles.newRequestBtn}
                         onClick={() => setIsCreateModalVisible(true)}
                     >
-                        Yêu cầu Mới
+                        {t.requests.btnNew}
                     </Button>
                 )}
             </div>
@@ -231,17 +221,17 @@ export const AdminRequests: React.FC = () => {
                         columns={columns}
                         dataSource={requests ?? []}
                         rowKey="id"
-                        pagination={{ pageSize: 10, showTotal: (total) => `Tổng ${total} yêu cầu` }}
+                        pagination={{ pageSize: 10, showTotal: (total) => t.requests.totalItems.replace('{n}', String(total)) }}
                         scroll={{ x: 900 }}
                     />
                 </div>
             ) : (
-                <Empty description="Không có yêu cầu nào" />
+                <Empty description={t.requests.noRequests} />
             )}
 
             {/* ── Create Modal ── */}
             <Modal
-                title="Yêu cầu Hành chính Mới"
+                title={t.requests.createTitle}
                 open={isCreateModalVisible}
                 onCancel={() => setIsCreateModalVisible(false)}
                 footer={null}
@@ -250,43 +240,43 @@ export const AdminRequests: React.FC = () => {
             >
                 <Form form={createForm} layout="vertical" onFinish={handleCreate}>
                     <Form.Item
-                        label="Loại yêu cầu"
+                        label={t.requests.formTypeLabel}
                         name="request_type"
-                        rules={[{ required: true, message: 'Vui lòng chọn loại yêu cầu' }]}
+                        rules={[{ required: true, message: t.requests.formTypeRequired }]}
                     >
-                        <Select options={REQUEST_TYPE_OPTIONS} placeholder="Chọn loại" />
+                        <Select options={REQUEST_TYPE_OPTIONS} placeholder={t.requests.formTypePlaceholder} />
                     </Form.Item>
                     <Form.Item
-                        label="Tiêu đề"
+                        label={t.requests.formTitleLabel}
                         name="title"
-                        rules={[{ required: true, message: 'Vui lòng nhập tiêu đề' }]}
+                        rules={[{ required: true, message: t.requests.formTitleRequired }]}
                     >
-                        <Input placeholder="Tiêu đề ngắn gọn cho yêu cầu" />
+                        <Input placeholder={t.requests.formTitlePlaceholder} />
                     </Form.Item>
                     <Form.Item
-                        label="Mô tả"
+                        label={t.requests.formDescLabel}
                         name="description"
-                        rules={[{ required: true, message: 'Vui lòng nhập mô tả' }]}
+                        rules={[{ required: true, message: t.requests.formDescRequired }]}
                     >
-                        <Input.TextArea rows={4} placeholder="Mô tả chi tiết yêu cầu của bạn" />
+                        <Input.TextArea rows={4} placeholder={t.requests.formDescPlaceholder} />
                     </Form.Item>
                     <Form.Item
-                        label="Độ ưu tiên"
+                        label={t.requests.formPriorityLabel}
                         name="priority"
                         initialValue="medium"
                     >
                         <Select options={PRIORITY_OPTIONS} />
                     </Form.Item>
-                    <Form.Item label="Tệp đính kèm" name="attachment">
+                    <Form.Item label={t.requests.formAttachLabel} name="attachment">
                         <Upload maxCount={1} beforeUpload={() => false}>
-                            <Button icon={<UploadOutlined />}>Đính kèm tệp</Button>
+                            <Button icon={<UploadOutlined />}>{t.requests.btnAttach}</Button>
                         </Upload>
                     </Form.Item>
                     <Form.Item style={{ textAlign: 'right', marginBottom: 0 }}>
                         <Space>
-                            <Button onClick={() => setIsCreateModalVisible(false)}>Hủy</Button>
+                            <Button onClick={() => setIsCreateModalVisible(false)}>{t.requests.btnCancel}</Button>
                             <Button type="primary" htmlType="submit" loading={createMutation.isPending}>
-                                Gửi Yêu cầu
+                                {t.requests.btnSubmit}
                             </Button>
                         </Space>
                     </Form.Item>
@@ -295,40 +285,40 @@ export const AdminRequests: React.FC = () => {
 
             {/* ── Detail Modal ── */}
             <Modal
-                title="Chi tiết Yêu cầu"
+                title={t.requests.detailTitle}
                 open={isDetailModalVisible}
                 onCancel={() => setIsDetailModalVisible(false)}
                 width={700}
                 className={styles.modal}
-                footer={<Button onClick={() => setIsDetailModalVisible(false)}>Đóng</Button>}
+                footer={<Button onClick={() => setIsDetailModalVisible(false)}>{t.requests.btnClose}</Button>}
             >
                 {selectedRequest && (
                     <Descriptions bordered column={2} size="small">
-                        <Descriptions.Item label="Tiêu đề" span={2}>{selectedRequest.title}</Descriptions.Item>
-                        <Descriptions.Item label="Loại">{selectedRequest.request_type_display}</Descriptions.Item>
-                        <Descriptions.Item label="Độ ưu tiên">
+                        <Descriptions.Item label={t.requests.descItemTitle} span={2}>{selectedRequest.title}</Descriptions.Item>
+                        <Descriptions.Item label={t.requests.descItemType}>{selectedRequest.request_type_display}</Descriptions.Item>
+                        <Descriptions.Item label={t.requests.descItemPriority}>
                             <Tag color={priorityColorMap[selectedRequest.priority]} className={styles.tagPriority}>
                                 {selectedRequest.priority.toUpperCase()}
                             </Tag>
                         </Descriptions.Item>
-                        <Descriptions.Item label="Trạng thái">
+                        <Descriptions.Item label={t.requests.descItemStatus}>
                             <Tag color={statusColorMap[selectedRequest.status]} className={styles.tagStatus}>
                                 {selectedRequest.status.replace('_', ' ').toUpperCase()}
                             </Tag>
                         </Descriptions.Item>
-                        <Descriptions.Item label="Ngày tạo">{formatDate(selectedRequest.created_at)}</Descriptions.Item>
-                        <Descriptions.Item label="Mô tả" span={2}>{selectedRequest.description}</Descriptions.Item>
+                        <Descriptions.Item label={t.requests.descItemCreated}>{formatDate(selectedRequest.created_at)}</Descriptions.Item>
+                        <Descriptions.Item label={t.requests.descItemDesc} span={2}>{selectedRequest.description}</Descriptions.Item>
                         {selectedRequest.employee_name && (
-                            <Descriptions.Item label="Nhân viên">{selectedRequest.employee_name}</Descriptions.Item>
+                            <Descriptions.Item label={t.requests.descItemEmployee}>{selectedRequest.employee_name}</Descriptions.Item>
                         )}
                         {selectedRequest.processed_by_name && (
-                            <Descriptions.Item label="Người xử lý">{selectedRequest.processed_by_name}</Descriptions.Item>
+                            <Descriptions.Item label={t.requests.descItemProcessor}>{selectedRequest.processed_by_name}</Descriptions.Item>
                         )}
                         {selectedRequest.admin_comment && (
-                            <Descriptions.Item label="Nhận xét" span={2}>{selectedRequest.admin_comment}</Descriptions.Item>
+                            <Descriptions.Item label={t.requests.descItemComment} span={2}>{selectedRequest.admin_comment}</Descriptions.Item>
                         )}
                         {selectedRequest.completed_at && (
-                            <Descriptions.Item label="Ngày hoàn thành">{formatDate(selectedRequest.completed_at)}</Descriptions.Item>
+                            <Descriptions.Item label={t.requests.descItemCompleted}>{formatDate(selectedRequest.completed_at)}</Descriptions.Item>
                         )}
                     </Descriptions>
                 )}
@@ -336,7 +326,7 @@ export const AdminRequests: React.FC = () => {
 
             {/* ── Process Modal ── */}
             <Modal
-                title="Xử lý Yêu cầu"
+                title={t.requests.processTitle}
                 open={isProcessModalVisible}
                 onCancel={() => setIsProcessModalVisible(false)}
                 footer={null}
@@ -345,28 +335,23 @@ export const AdminRequests: React.FC = () => {
             >
                 <Form form={processForm} layout="vertical" onFinish={handleProcess}>
                     <Form.Item
-                        label="Trạng thái"
+                        label={t.requests.processStatusLabel}
                         name="status"
-                        rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
+                        rules={[{ required: true, message: t.requests.processStatusRequired }]}
                     >
                         <Select
-                            placeholder="Chọn trạng thái"
-                            options={[
-                                { value: 'in_progress', label: 'Đang xử lý' },
-                                { value: 'approved', label: 'Đã duyệt' },
-                                { value: 'rejected', label: 'Từ chối' },
-                                { value: 'completed', label: 'Hoàn thành' },
-                            ]}
+                            placeholder={t.requests.processStatusLabel}
+                            options={Object.entries(t.requests.statusValues).map(([value, label]) => ({ value, label }))}
                         />
                     </Form.Item>
-                    <Form.Item label="Nhận xét" name="admin_comment">
-                        <Input.TextArea rows={3} placeholder="Thêm nhận xét (tùy chọn)" />
+                    <Form.Item label={t.requests.processCommentLabel} name="admin_comment">
+                        <Input.TextArea rows={3} placeholder={t.requests.processCommentLabel} />
                     </Form.Item>
                     <Form.Item style={{ textAlign: 'right', marginBottom: 0 }}>
                         <Space>
-                            <Button onClick={() => setIsProcessModalVisible(false)}>Hủy</Button>
+                            <Button onClick={() => setIsProcessModalVisible(false)}>{t.requests.btnCancel}</Button>
                             <Button type="primary" htmlType="submit" loading={processMutation.isPending}>
-                                Gửi
+                                {t.requests.btnSubmit}
                             </Button>
                         </Space>
                     </Form.Item>

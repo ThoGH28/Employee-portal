@@ -5,6 +5,7 @@ import {
 } from 'antd'
 import { CheckOutlined, CloseOutlined, EyeOutlined, CalendarOutlined, FilterOutlined } from '@ant-design/icons'
 import { useAllLeaveRequests, useApproveLeaveRequest } from '../../shared/hooks/queries'
+import { useI18n } from '../../shared/context/i18n'
 import { formatDate } from '../../shared/utils/helpers'
 import type { LeaveRequest } from '../../shared/types'
 import styles from './LeaveApproval.module.css'
@@ -16,23 +17,10 @@ const STATUS_COLOR: Record<string, string> = {
     cancelled: 'default',
 }
 
-const STATUS_LABEL: Record<string, string> = {
-    pending: 'Chờ duyệt',
-    approved: 'Đã duyệt',
-    rejected: 'Từ chối',
-    cancelled: 'Đã hủy',
-}
-
-const LEAVE_TYPE_LABEL: Record<string, string> = {
-    sick: 'Nghỉ ốm',
-    casual: 'Nghỉ việc riêng',
-    earned: 'Nghỉ phép năm',
-    maternity: 'Nghỉ thai sản',
-    paternity: 'Nghỉ chăm con',
-    unpaid: 'Nghỉ không lương',
-}
-
 export const LeaveApproval: React.FC = () => {
+    const t = useI18n()
+    const STATUS_LABEL: Record<string, string> = t.leaveStatuses as Record<string, string>
+    const LEAVE_TYPE_LABEL: Record<string, string> = t.leaveTypes as Record<string, string>
     const [statusFilter, setStatusFilter] = useState<string | undefined>('pending')
     const [leaveTypeFilter, setLeaveTypeFilter] = useState<string | undefined>(undefined)
     const [selectedLeave, setSelectedLeave] = useState<LeaveRequest | null>(null)
@@ -66,12 +54,12 @@ export const LeaveApproval: React.FC = () => {
             { id: selectedLeave.id, data: { status: actionType, approval_comment: values.approval_comment ?? '' } },
             {
                 onSuccess: () => {
-                    message.success(actionType === 'approved' ? 'Đã duyệt đơn nghỉ phép' : 'Đã từ chối đơn nghỉ phép')
+                    message.success(actionType === 'approved' ? t.leaveApproval.approveSuccess : t.leaveApproval.rejectSuccess)
                     setIsApproveOpen(false)
                     setSelectedLeave(null)
                 },
                 onError: (err: any) => {
-                    message.error(err?.response?.data?.detail || 'Thao tác thất bại')
+                    message.error(err?.response?.data?.detail || t.leaveApproval.actionFailed)
                 },
             }
         )
@@ -79,59 +67,59 @@ export const LeaveApproval: React.FC = () => {
 
     const columns = [
         {
-            title: 'Nhân viên',
+            title: t.leaveApproval.colEmployee,
             dataIndex: 'employee_name',
             key: 'employee_name',
             render: (name: string) => <span style={{ fontWeight: 500 }}>{name}</span>,
         },
         {
-            title: 'Loại nghỉ',
+            title: t.leaveApproval.colLeaveType,
             dataIndex: 'leave_type',
             key: 'leave_type',
             render: (type: string) => LEAVE_TYPE_LABEL[type] ?? type,
         },
         {
-            title: 'Từ ngày',
+            title: t.leaveApproval.colFromDate,
             dataIndex: 'start_date',
             key: 'start_date',
             render: (d: string) => formatDate(d),
         },
         {
-            title: 'Đến ngày',
+            title: t.leaveApproval.colToDate,
             dataIndex: 'end_date',
             key: 'end_date',
             render: (d: string) => formatDate(d),
         },
         {
-            title: 'Số ngày',
+            title: t.leaveApproval.colDays,
             dataIndex: 'days_count',
             key: 'days_count',
-            render: (n: number) => `${n} ngày`,
+            render: (n: number) => `${n} ${t.leaveApproval.days}`,
             align: 'center' as const,
         },
         {
-            title: 'Trạng thái',
+            title: t.leaveApproval.colStatus,
             dataIndex: 'status',
             key: 'status',
             render: (s: string) => <Tag color={STATUS_COLOR[s]}>{STATUS_LABEL[s] ?? s}</Tag>,
         },
         {
-            title: 'Ngày tạo',
+            title: t.leaveApproval.colCreated,
             dataIndex: 'created_at',
             key: 'created_at',
             render: (d: string) => formatDate(d),
         },
         {
-            title: 'Thao tác',
+            title: t.leaveApproval.colActions,
             key: 'actions',
             render: (_: any, record: LeaveRequest) => (
                 <Space size="small">
-                    <Tooltip title="Xem chi tiết">
+                    <Tooltip title={t.leaveApproval.tooltipView}>
                         <Button icon={<EyeOutlined />} size="small" onClick={() => openDetail(record)} />
                     </Tooltip>
                     {record.status === 'pending' && (
                         <>
-                            <Tooltip title="Duyệt">
+                            <Tooltip title={t.leaveApproval.tooltipApprove}>
                                 <Button
                                     icon={<CheckOutlined />}
                                     size="small"
@@ -139,7 +127,7 @@ export const LeaveApproval: React.FC = () => {
                                     onClick={() => openAction(record, 'approved')}
                                 />
                             </Tooltip>
-                            <Tooltip title="Từ chối">
+                            <Tooltip title={t.leaveApproval.tooltipReject}>
                                 <Button
                                     icon={<CloseOutlined />}
                                     size="small"
@@ -162,7 +150,7 @@ export const LeaveApproval: React.FC = () => {
                 title={
                     <Space>
                         <CalendarOutlined />
-                        <span>Duyệt Đơn Nghỉ Phép</span>
+                        <span>{t.leaveApproval.cardTitle}</span>
                         {pendingCount > 0 && (
                             <Badge count={pendingCount} style={{ backgroundColor: '#f59e0b' }} />
                         )}
@@ -172,20 +160,20 @@ export const LeaveApproval: React.FC = () => {
                     <Space>
                         <FilterOutlined />
                         <Select
-                            placeholder="Trạng thái"
+                            placeholder={t.leaveApproval.filterStatus}
                             allowClear
                             style={{ width: 140 }}
                             value={statusFilter}
                             onChange={setStatusFilter}
                             options={[
-                                { value: 'pending', label: 'Chờ duyệt' },
-                                { value: 'approved', label: 'Đã duyệt' },
-                                { value: 'rejected', label: 'Từ chối' },
-                                { value: 'cancelled', label: 'Đã hủy' },
+                                { value: 'pending', label: t.leaveStatuses.pending },
+                                { value: 'approved', label: t.leaveStatuses.approved },
+                                { value: 'rejected', label: t.leaveStatuses.rejected },
+                                { value: 'cancelled', label: t.leaveStatuses.cancelled },
                             ]}
                         />
                         <Select
-                            placeholder="Loại nghỉ"
+                            placeholder={t.leaveApproval.filterLeaveType}
                             allowClear
                             style={{ width: 160 }}
                             value={leaveTypeFilter}
@@ -203,16 +191,16 @@ export const LeaveApproval: React.FC = () => {
                         columns={columns}
                         rowKey="id"
                         scroll={{ x: 800 }}
-                        pagination={{ pageSize: 15, showTotal: (total) => `Tổng ${total} đơn` }}
+                        pagination={{ pageSize: 15, showTotal: (total) => t.leaveApproval.totalItems.replace('{n}', String(total)) }}
                     />
                 ) : (
-                    <Empty description="Không có đơn nghỉ phép nào" style={{ padding: 40 }} />
+                    <Empty description={t.leaveApproval.noLeaves} style={{ padding: 40 }} />
                 )}
             </Card>
 
             {/* Detail Modal */}
             <Modal
-                title="Chi tiết đơn nghỉ phép"
+                title={t.leaveApproval.detailTitle}
                 open={isDetailOpen}
                 onCancel={() => setIsDetailOpen(false)}
                 footer={
@@ -223,50 +211,50 @@ export const LeaveApproval: React.FC = () => {
                                 icon={<CheckOutlined />}
                                 onClick={() => { setIsDetailOpen(false); openAction(selectedLeave!, 'approved') }}
                             >
-                                Duyệt
+                                {t.leaveApproval.btnApprove}
                             </Button>
                             <Button
                                 danger
                                 icon={<CloseOutlined />}
                                 onClick={() => { setIsDetailOpen(false); openAction(selectedLeave!, 'rejected') }}
                             >
-                                Từ chối
+                                {t.leaveApproval.btnReject}
                             </Button>
                         </Space>
                     ) : (
-                        <Button onClick={() => setIsDetailOpen(false)}>Đóng</Button>
+                        <Button onClick={() => setIsDetailOpen(false)}>{t.leaveApproval.btnClose}</Button>
                     )
                 }
                 width={560}
             >
                 {selectedLeave && (
                     <Descriptions bordered column={1} size="small">
-                        <Descriptions.Item label="Nhân viên">{selectedLeave.employee_name}</Descriptions.Item>
-                        <Descriptions.Item label="Loại nghỉ">{LEAVE_TYPE_LABEL[selectedLeave.leave_type] ?? selectedLeave.leave_type}</Descriptions.Item>
-                        <Descriptions.Item label="Từ ngày">{formatDate(selectedLeave.start_date)}</Descriptions.Item>
-                        <Descriptions.Item label="Đến ngày">{formatDate(selectedLeave.end_date)}</Descriptions.Item>
-                        <Descriptions.Item label="Số ngày">{selectedLeave.days_count} ngày</Descriptions.Item>
-                        <Descriptions.Item label="Lý do">{selectedLeave.reason}</Descriptions.Item>
-                        <Descriptions.Item label="Trạng thái">
+                        <Descriptions.Item label={t.leaveApproval.descEmployee}>{selectedLeave.employee_name}</Descriptions.Item>
+                        <Descriptions.Item label={t.leaveApproval.descLeaveType}>{LEAVE_TYPE_LABEL[selectedLeave.leave_type] ?? selectedLeave.leave_type}</Descriptions.Item>
+                        <Descriptions.Item label={t.leaveApproval.descFromDate}>{formatDate(selectedLeave.start_date)}</Descriptions.Item>
+                        <Descriptions.Item label={t.leaveApproval.descToDate}>{formatDate(selectedLeave.end_date)}</Descriptions.Item>
+                        <Descriptions.Item label={t.leaveApproval.descDays}>{selectedLeave.days_count} {t.leaveApproval.days}</Descriptions.Item>
+                        <Descriptions.Item label={t.leaveApproval.descReason}>{selectedLeave.reason}</Descriptions.Item>
+                        <Descriptions.Item label={t.leaveApproval.descStatus}>
                             <Tag color={STATUS_COLOR[selectedLeave.status]}>{STATUS_LABEL[selectedLeave.status]}</Tag>
                         </Descriptions.Item>
                         {selectedLeave.approved_by_name && (
-                            <Descriptions.Item label="Người duyệt">{selectedLeave.approved_by_name}</Descriptions.Item>
+                            <Descriptions.Item label={t.leaveApproval.descApprovedBy}>{selectedLeave.approved_by_name}</Descriptions.Item>
                         )}
                         {selectedLeave.approval_date && (
-                            <Descriptions.Item label="Ngày duyệt">{formatDate(selectedLeave.approval_date)}</Descriptions.Item>
+                            <Descriptions.Item label={t.leaveApproval.descApprovalDate}>{formatDate(selectedLeave.approval_date)}</Descriptions.Item>
                         )}
                         {selectedLeave.approval_comment && (
-                            <Descriptions.Item label="Nhận xét">{selectedLeave.approval_comment}</Descriptions.Item>
+                            <Descriptions.Item label={t.leaveApproval.descComment}>{selectedLeave.approval_comment}</Descriptions.Item>
                         )}
-                        <Descriptions.Item label="Ngày tạo">{formatDate(selectedLeave.created_at)}</Descriptions.Item>
+                        <Descriptions.Item label={t.leaveApproval.descCreated}>{formatDate(selectedLeave.created_at)}</Descriptions.Item>
                     </Descriptions>
                 )}
             </Modal>
 
             {/* Approve / Reject Modal */}
             <Modal
-                title={actionType === 'approved' ? 'Duyệt đơn nghỉ phép' : 'Từ chối đơn nghỉ phép'}
+                title={actionType === 'approved' ? t.leaveApproval.modalApproveTitle : t.leaveApproval.modalRejectTitle}
                 open={isApproveOpen}
                 onCancel={() => setIsApproveOpen(false)}
                 footer={null}
@@ -274,8 +262,8 @@ export const LeaveApproval: React.FC = () => {
                 {selectedLeave && (
                     <div style={{ marginBottom: 16 }}>
                         <p>
-                            Nhân viên: <strong>{selectedLeave.employee_name}</strong> —{' '}
-                            {LEAVE_TYPE_LABEL[selectedLeave.leave_type]} ({selectedLeave.days_count} ngày)
+                            {t.leaveApproval.employeePrefix} <strong>{selectedLeave.employee_name}</strong> —{' '}
+                            {LEAVE_TYPE_LABEL[selectedLeave.leave_type]} ({selectedLeave.days_count} {t.leaveApproval.days})
                         </p>
                         <p style={{ color: '#64748b', fontSize: 13 }}>
                             {formatDate(selectedLeave.start_date)} → {formatDate(selectedLeave.end_date)}
@@ -284,16 +272,16 @@ export const LeaveApproval: React.FC = () => {
                 )}
                 <Form form={form} layout="vertical" onFinish={handleSubmitAction}>
                     <Form.Item
-                        label="Nhận xét (không bắt buộc)"
+                        label={t.leaveApproval.commentLabel}
                         name="approval_comment"
                     >
                         <Input.TextArea
                             rows={3}
-                            placeholder={actionType === 'approved' ? 'Ghi chú khi duyệt...' : 'Lý do từ chối...'}
+                            placeholder={actionType === 'approved' ? t.leaveApproval.approvePlaceholder : t.leaveApproval.rejectPlaceholder}
                         />
                     </Form.Item>
                     <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-                        <Button onClick={() => setIsApproveOpen(false)}>Hủy</Button>
+                        <Button onClick={() => setIsApproveOpen(false)}>{t.leaveApproval.btnCancel}</Button>
                         <Button
                             type={actionType === 'approved' ? 'primary' : 'default'}
                             danger={actionType === 'rejected'}
@@ -301,7 +289,7 @@ export const LeaveApproval: React.FC = () => {
                             loading={isPending}
                             icon={actionType === 'approved' ? <CheckOutlined /> : <CloseOutlined />}
                         >
-                            {actionType === 'approved' ? 'Xác nhận duyệt' : 'Xác nhận từ chối'}
+                            {actionType === 'approved' ? t.leaveApproval.btnApprove : t.leaveApproval.btnReject}
                         </Button>
                     </Space>
                 </Form>

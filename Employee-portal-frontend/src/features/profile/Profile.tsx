@@ -14,12 +14,14 @@ import {
 } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { employeeService } from '../../shared/services/employeeService';
+import { useI18n } from '../../shared/context/i18n';
 import { getInitials } from '../../shared/utils/helpers';
 import styles from './Profile.module.css';
 
 export const Profile: React.FC = () => {
     const [form] = Form.useForm();
     const queryClient = useQueryClient();
+    const t = useI18n();
 
     const { data: profile, isLoading } = useQuery({
         queryKey: ['employee', 'profile'],
@@ -30,11 +32,11 @@ export const Profile: React.FC = () => {
     const updateMutation = useMutation({
         mutationFn: (data: Record<string, unknown>) => employeeService.updateProfile(data),
         onSuccess: () => {
-            message.success('Cập nhật hồ sơ thành công');
+            message.success(t.profile.updateSuccess);
             queryClient.invalidateQueries({ queryKey: ['employee', 'profile'] });
         },
         onError: () => {
-            message.error('Cập nhật hồ sơ thất bại');
+            message.error(t.profile.updateError);
         },
     });
 
@@ -76,9 +78,9 @@ export const Profile: React.FC = () => {
                         <span className={styles.titleIcon}>
                             <UserOutlined />
                         </span>
-                        Hồ sơ của tôi
+                        {t.profile.pageTitle}
                     </h1>
-                    <p>Xem và cập nhật thông tin cá nhân của bạn.</p>
+                    <p>{t.profile.pageDesc}</p>
                 </div>
             </div>
 
@@ -122,11 +124,11 @@ export const Profile: React.FC = () => {
                 <div className={styles.sectionCard}>
                     <p className={styles.sectionTitle}>
                         <span className={styles.sectionIcon}><UserOutlined /></span>
-                        Thông tin Cơ bản
+                        {t.profile.sectionBasic}
                     </p>
                     <Row gutter={[16, 0]}>
                         <Col xs={24} md={8}>
-                            <Form.Item label="Họ">
+                            <Form.Item label={t.profile.fieldFirstName}>
                                 <Input
                                     value={user?.first_name}
                                     disabled
@@ -135,7 +137,7 @@ export const Profile: React.FC = () => {
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
-                            <Form.Item label="Tên">
+                            <Form.Item label={t.profile.fieldLastName}>
                                 <Input
                                     value={user?.last_name}
                                     disabled
@@ -144,7 +146,7 @@ export const Profile: React.FC = () => {
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
-                            <Form.Item label="Email">
+                            <Form.Item label={t.profile.fieldEmail}>
                                 <Input
                                     value={user?.email}
                                     disabled
@@ -154,7 +156,7 @@ export const Profile: React.FC = () => {
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
-                            <Form.Item label="Phòng ban">
+                            <Form.Item label={t.profile.fieldDept}>
                                 <Input
                                     value={profile?.department}
                                     disabled
@@ -164,7 +166,7 @@ export const Profile: React.FC = () => {
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
-                            <Form.Item label="Chức danh">
+                            <Form.Item label={t.profile.fieldDesignation}>
                                 <Input
                                     value={profile?.designation}
                                     disabled
@@ -174,7 +176,7 @@ export const Profile: React.FC = () => {
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
-                            <Form.Item label="Ngày vào làm">
+                            <Form.Item label={t.profile.fieldJoinDate}>
                                 <Input
                                     value={profile?.date_of_joining}
                                     disabled
@@ -190,36 +192,36 @@ export const Profile: React.FC = () => {
                 <div className={styles.sectionCard}>
                     <p className={styles.sectionTitle}>
                         <span className={styles.sectionIcon}><HomeOutlined /></span>
-                        Địa chỉ
+                        {t.profile.sectionAddress}
                     </p>
                     <Row gutter={[16, 0]}>
                         <Col xs={24}>
-                            <Form.Item label="Địa chỉ" name="address">
+                            <Form.Item label={t.profile.fieldAddress} name="address">
                                 <Input.TextArea
                                     rows={2}
-                                    placeholder="Nhập địa chỉ của bạn"
+                                    placeholder={t.profile.placeholderAddress}
                                     style={{ resize: 'none' }}
                                 />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={6}>
-                            <Form.Item label="Thành phố" name="city">
-                                <Input placeholder="Thành phố" />
+                            <Form.Item label={t.profile.fieldCity} name="city">
+                                <Input placeholder={t.profile.fieldCity} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={6}>
-                            <Form.Item label="Tỉnh" name="state">
-                                <Input placeholder="Tỉnh" />
+                            <Form.Item label={t.profile.fieldState} name="state">
+                                <Input placeholder={t.profile.fieldState} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={6}>
-                            <Form.Item label="Quốc gia" name="country">
-                                <Input placeholder="Quốc gia" />
+                            <Form.Item label={t.profile.fieldCountry} name="country">
+                                <Input placeholder={t.profile.fieldCountry} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={6}>
-                            <Form.Item label="Mã bưu điện" name="postal_code">
-                                <Input placeholder="Mã bưu điện" />
+                            <Form.Item label={t.profile.fieldPostal} name="postal_code">
+                                <Input placeholder={t.profile.fieldPostal} />
                             </Form.Item>
                         </Col>
                     </Row>
@@ -229,19 +231,19 @@ export const Profile: React.FC = () => {
                 <div className={styles.sectionCard}>
                     <p className={styles.sectionTitle}>
                         <span className={styles.sectionIcon}><PhoneOutlined /></span>
-                        Liên hệ Khẩn cấp
+                        {t.profile.sectionEmergency}
                     </p>
                     <Row gutter={[16, 0]}>
                         <Col xs={24} md={12}>
-                            <Form.Item label="Tên liên hệ" name="emergency_contact">
+                            <Form.Item label={t.profile.fieldEmergencyContact} name="emergency_contact">
                                 <Input
-                                    placeholder="Họ tên người liên hệ khẩn cấp"
+                                    placeholder={t.profile.placeholderEmergencyContact}
                                     prefix={<UserOutlined style={{ color: 'var(--brand-gray-300)' }} />}
                                 />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={12}>
-                            <Form.Item label="Số điện thoại" name="emergency_contact_phone">
+                            <Form.Item label={t.profile.fieldEmergencyPhone} name="emergency_contact_phone">
                                 <Input
                                     placeholder="+84 000 000 000"
                                     prefix={<PhoneOutlined style={{ color: 'var(--brand-gray-300)' }} />}
@@ -255,25 +257,25 @@ export const Profile: React.FC = () => {
                 <div className={styles.sectionCard}>
                     <p className={styles.sectionTitle}>
                         <span className={styles.sectionIcon}><BankOutlined /></span>
-                        Tài khoản Ngân hàng
+                        {t.profile.sectionBank}
                     </p>
                     <Row gutter={[16, 0]}>
                         <Col xs={24} md={8}>
-                            <Form.Item label="Tên ngân hàng" name="bank_name">
+                            <Form.Item label={t.profile.fieldBankName} name="bank_name">
                                 <Input
-                                    placeholder="VD: Vietcombank"
+                                    placeholder={t.profile.placeholderBankName}
                                     prefix={<BankOutlined style={{ color: 'var(--brand-gray-300)' }} />}
                                 />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
-                            <Form.Item label="Số tài khoản" name="bank_account_number">
-                                <Input placeholder="Số tài khoản" />
+                            <Form.Item label={t.profile.fieldBankAccount} name="bank_account_number">
+                                <Input placeholder={t.profile.fieldBankAccount} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
-                            <Form.Item label="Chi nhánh" name="bank_branch">
-                                <Input placeholder="Tên chi nhánh" />
+                            <Form.Item label={t.profile.fieldBankBranch} name="bank_branch">
+                                <Input placeholder={t.profile.fieldBankBranch} />
                             </Form.Item>
                         </Col>
                     </Row>
@@ -283,12 +285,12 @@ export const Profile: React.FC = () => {
                 <div className={styles.sectionCard}>
                     <p className={styles.sectionTitle}>
                         <span className={styles.sectionIcon}><InfoCircleOutlined /></span>
-                        Giới thiệu
+                        {t.profile.sectionBio}
                     </p>
-                    <Form.Item label="Tiểu sử" name="bio">
+                    <Form.Item label={t.profile.fieldBio} name="bio">
                         <Input.TextArea
                             rows={3}
-                            placeholder="Giới thiệu ngắn về bản thân — vai trò, sở thích hoặc chuyên môn…"
+                            placeholder={t.profile.placeholderBio}
                             style={{ resize: 'none' }}
                         />
                     </Form.Item>
@@ -297,7 +299,7 @@ export const Profile: React.FC = () => {
                 {/* Footer action */}
                 <div className={styles.footerBar}>
                     <span className={styles.footerHint}>
-                        Thông tin cơ bản do phòng Nhân sự quản lý và không thể chỉnh sửa tại đây.
+                        {t.profile.footerHint}
                     </span>
                     <button
                         type="submit"
@@ -305,7 +307,7 @@ export const Profile: React.FC = () => {
                         disabled={updateMutation.isPending}
                     >
                         <SaveOutlined />
-                        {updateMutation.isPending ? 'Đang lưu…' : 'Lưu Thay đổi'}
+                        {updateMutation.isPending ? t.profile.btnSaving : t.profile.btnSave}
                     </button>
                 </div>
 

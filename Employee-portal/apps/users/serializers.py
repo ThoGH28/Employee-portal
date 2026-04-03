@@ -4,7 +4,7 @@ Serializers for user authentication
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from apps.users.models import CustomUser
+from apps.users.models import CustomUser, LoginLog
 from apps.users.authentication import generate_tokens
 
 
@@ -199,3 +199,17 @@ class ChangePasswordSerializer(serializers.Serializer):
         instance.set_password(validated_data['new_password'])
         instance.save()
         return instance
+
+
+class LoginLogSerializer(serializers.ModelSerializer):
+    """
+    Serializer for LoginLog - used by admin to audit login activity
+    """
+    username = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LoginLog
+        fields = ['id', 'username', 'username_attempted', 'ip_address', 'user_agent', 'status', 'created_at']
+
+    def get_username(self, obj):
+        return obj.user.username if obj.user else None

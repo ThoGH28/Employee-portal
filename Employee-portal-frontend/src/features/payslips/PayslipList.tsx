@@ -12,6 +12,7 @@ import {
 import styles from './Payslips.module.css';
 import { payslipService } from '../../shared/services/payslipService';
 import type { Payslip } from '../../shared/types/payslip';
+import { useI18n } from '../../shared/context/i18n';
 
 
 /* ── Helpers ────────────────────────────────────────────────────── */
@@ -34,7 +35,9 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 };
 
 /* ── Payslip Detail ──────────────────────────────────────────────── */
-const PayslipDetails: React.FC<{ payslip: Payslip }> = ({ payslip }) => (
+const PayslipDetails: React.FC<{ payslip: Payslip }> = ({ payslip }) => {
+    const t = useI18n();
+    return (
     <div className={styles.payslipDetails}>
         {/* Month + Status */}
         <div className={styles.detailHeader}>
@@ -46,54 +49,54 @@ const PayslipDetails: React.FC<{ payslip: Payslip }> = ({ payslip }) => (
         <div className={styles.detailsGrid}>
             {/* Earnings */}
             <div className={styles.section}>
-                <p className={`${styles.sectionLabel} ${styles.earningsLabel}`}>Thu nhập</p>
+                <p className={`${styles.sectionLabel} ${styles.earningsLabel}`}>{t.payslips.earnings}</p>
                 <div className={styles.detailRow}>
-                    <span>Lương cơ bản</span>
+                    <span>{t.payslips.basic}</span>
                     <span>{fmt(payslip.basic_salary)}</span>
                 </div>
                 <div className={styles.detailRow}>
-                    <span>Phụ cấp nhà ở</span>
+                    <span>{t.payslips.hra}</span>
                     <span>{fmt(payslip.house_rent_allowance)}</span>
                 </div>
                 <div className={styles.detailRow}>
-                    <span>Phụ cấp đắt đỏ</span>
+                    <span>{t.payslips.da}</span>
                     <span>{fmt(payslip.dearness_allowance)}</span>
                 </div>
                 {payslip.other_allowances > 0 && (
                     <div className={styles.detailRow}>
-                        <span>Phụ cấp khác</span>
+                        <span>{t.payslips.otherAllowances}</span>
                         <span>{fmt(payslip.other_allowances)}</span>
                     </div>
                 )}
                 <div className={styles.detailRowTotal}>
-                    <span>Tổng lương</span>
+                    <span>{t.payslips.grossSalary}</span>
                     <span>{fmt(payslip.gross_salary)}</span>
                 </div>
             </div>
 
             {/* Deductions */}
             <div className={styles.section}>
-                <p className={`${styles.sectionLabel} ${styles.deductionsLabel}`}>Khấu trừ</p>
+                <p className={`${styles.sectionLabel} ${styles.deductionsLabel}`}>{t.payslips.deductions}</p>
                 <div className={styles.detailRow}>
-                    <span>Quỹ dự phòng</span>
+                    <span>{t.payslips.pf}</span>
                     <span>{fmt(payslip.provident_fund)}</span>
                 </div>
                 <div className={styles.detailRow}>
-                    <span>Thuế TNCN</span>
+                    <span>{t.payslips.tax}</span>
                     <span>{fmt(payslip.tax_deducted_at_source)}</span>
                 </div>
                 <div className={styles.detailRow}>
-                    <span>Bảo hiểm</span>
+                    <span>{t.payslips.insurance}</span>
                     <span>{fmt(payslip.insurance)}</span>
                 </div>
                 {payslip.other_deductions > 0 && (
                     <div className={styles.detailRow}>
-                        <span>Khấu trừ khác</span>
+                        <span>{t.payslips.otherDeductions}</span>
                         <span>{fmt(payslip.other_deductions)}</span>
                     </div>
                 )}
                 <div className={styles.detailRowTotal}>
-                    <span>Tổng khấu trừ</span>
+                    <span>{t.payslips.totalDeductions}</span>
                     <span>{fmt(payslip.total_deductions)}</span>
                 </div>
             </div>
@@ -102,21 +105,23 @@ const PayslipDetails: React.FC<{ payslip: Payslip }> = ({ payslip }) => (
         {/* Net Salary Hero */}
         <div className={styles.netSalarySection}>
             <div className={styles.netSalaryLeft}>
-                <h3>Lương Thực nhận</h3>
+                <h3>{t.payslips.netSalary}</h3>
                 <div className={styles.netSalaryAmount}>{fmt(payslip.net_salary)}</div>
             </div>
             <div className={styles.netSalaryRight}>
-                <small>Sau tất cả khấu trừ</small>
+                <small>{t.payslips.afterDeductions}</small>
                 <span className={styles.netSalaryTakehome}>
                     {payslip.month_year_display}
                 </span>
             </div>
         </div>
     </div>
-);
+    );
+};
 
 /* ── Main Component ──────────────────────────────────────────────── */
 const PayslipList: React.FC = () => {
+    const t = useI18n();
     const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
     const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
 
@@ -139,10 +144,10 @@ const PayslipList: React.FC = () => {
                 link.href = response.pdf_url;
                 link.download = `Payslip_${response.month_year}.pdf`;
                 link.click();
-                message.success('Tải phiếu lương thành công');
+                message.success(t.payslips.downloadSuccess);
             }
         } catch {
-            message.error('Tải phiếu lương thất bại');
+            message.error(t.payslips.downloadFailed);
         }
     };
 
@@ -160,27 +165,27 @@ const PayslipList: React.FC = () => {
     /* Table columns */
     const columns = [
         {
-            title: 'Tháng',
+            title: t.payslips.colMonth,
             dataIndex: 'month_year_display',
             key: 'month_year',
             width: 150,
         },
         {
-            title: 'Lương cơ bản',
+            title: t.payslips.colBasic,
             dataIndex: 'basic_salary',
             key: 'basic_salary',
             render: (v: number) => fmt(v),
             width: 140,
         },
         {
-            title: 'Tổng lương',
+            title: t.payslips.colGross,
             dataIndex: 'gross_salary',
             key: 'gross_salary',
             render: (v: number) => fmt(v),
             width: 140,
         },
         {
-            title: 'Khấu trừ',
+            title: t.payslips.colDeductions,
             dataIndex: 'total_deductions',
             key: 'total_deductions',
             render: (v: number) => (
@@ -189,7 +194,7 @@ const PayslipList: React.FC = () => {
             width: 130,
         },
         {
-            title: 'Lương thực nhận',
+            title: t.payslips.colNet,
             dataIndex: 'net_salary',
             key: 'net_salary',
             render: (v: number) => (
@@ -198,14 +203,14 @@ const PayslipList: React.FC = () => {
             width: 130,
         },
         {
-            title: 'Trạng thái',
+            title: t.payslips.colStatus,
             dataIndex: 'status',
             key: 'status',
             render: (status: string) => <StatusBadge status={status} />,
             width: 115,
         },
         {
-            title: 'Thao tác',
+            title: t.payslips.colActions,
             key: 'actions',
             render: (_: unknown, record: Payslip) => (
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -214,7 +219,7 @@ const PayslipList: React.FC = () => {
                         onClick={() => handleViewDetails(record)}
                     >
                         <EyeOutlined style={{ fontSize: 12 }} />
-                        View
+                        {t.requests.btnView}
                     </button>
                     {record.pdf_file && (
                         <button
@@ -245,8 +250,8 @@ const PayslipList: React.FC = () => {
         return (
             <div className={styles.emptyState}>
                 <div className={styles.emptyIcon}><FileTextOutlined /></div>
-                <p className={styles.emptyTitle}>Không thể tải phiếu lương</p>
-                <p className={styles.emptyDesc}>Vui lòng thử lại sau.</p>
+                <p className={styles.emptyTitle}>{t.payslips.loadFailed}</p>
+                <p className={styles.emptyDesc}>{t.payslips.retryMsg}</p>
             </div>
         );
     }
@@ -261,24 +266,24 @@ const PayslipList: React.FC = () => {
                         <span className={styles.titleIcon}>
                             <FileTextOutlined />
                         </span>
-                        Phiếu lương của tôi
+                        {t.payslips.pageTitle}
                     </h1>
-                    <p>Xem và tải phiếu lương hàng tháng của bạn.</p>
+                    <p>{t.payslips.pageDesc}</p>
                 </div>
 
                 {/* Summary pills */}
                 {summary && (
                     <div className={styles.summaryBar}>
                         <div className={styles.summaryPill}>
-                            <span>Tổng phiếu</span>
+                            <span>{t.payslips.summaryTotal}</span>
                             <span>{summary.total}</span>
                         </div>
                         <div className={`${styles.summaryPill} ${styles.accent}`}>
-                            <span>Lương mới nhất</span>
+                            <span>{t.payslips.summaryLatest}</span>
                             <span>{fmt(summary.latest)}</span>
                         </div>
                         <div className={styles.summaryPill}>
-                            <span>Lương TB</span>
+                            <span>{t.payslips.summaryAvg}</span>
                             <span>{fmt(summary.avg)}</span>
                         </div>
                     </div>
@@ -296,7 +301,7 @@ const PayslipList: React.FC = () => {
                             pageSize: 10,
                             total: payslips.length,
                             showSizeChanger: true,
-                            showTotal: (total) => `${total} phiếu lương`,
+                            showTotal: (total) => `${total} ${t.payslips.colMonth}`,
                             size: 'small',
                         }}
                         scroll={{ x: 980 }}
@@ -306,10 +311,8 @@ const PayslipList: React.FC = () => {
                 <div className={styles.tableCard}>
                     <div className={styles.emptyState}>
                         <div className={styles.emptyIcon}><DotChartOutlined /></div>
-                        <p className={styles.emptyTitle}>Chưa có phiếu lương</p>
-                        <p className={styles.emptyDesc}>
-                            Phiếu lương của bạn sẽ xuất hiện tại đây khi được xuất bản.
-                        </p>
+                        <p className={styles.emptyTitle}>{t.payslips.emptyTitle}</p>
+                        <p className={styles.emptyDesc}>{t.payslips.emptyDesc}</p>
                     </div>
                 </div>
             )}
@@ -323,7 +326,7 @@ const PayslipList: React.FC = () => {
                         fontSize: "17px",
                         letterSpacing: '-0.02em',
                     }}>
-                        Chi tiết Phiếu lương
+                        {t.payslips.detailTitle}
                     </span>
                 }
                 open={isDetailModalVisible}
@@ -346,7 +349,7 @@ const PayslipList: React.FC = () => {
                             className={`${styles.modalFooterBtn} ${styles.modalFooterBtnClose}`}
                             onClick={() => setIsDetailModalVisible(false)}
                         >
-                            Đóng
+                            {t.payslips.btnClose}
                         </button>
                         {selectedPayslip?.pdf_file && (
                             <button
@@ -354,7 +357,7 @@ const PayslipList: React.FC = () => {
                                 onClick={() => selectedPayslip && handleDownloadPDF(selectedPayslip)}
                             >
                                 <DownloadOutlined />
-                                Tải PDF
+                                {t.payslips.btnDownloadPdf}
                             </button>
                         )}
                     </div>

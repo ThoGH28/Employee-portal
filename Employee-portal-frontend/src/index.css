@@ -70,6 +70,44 @@
     --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* ─── Dark Mode Variables ───────────────────────────────────────── */
+[data-theme="dark"] {
+    --brand-black: #f1f5f9;
+    --brand-white: #0f172a;
+    --brand-gray-50: #1e293b;
+    --brand-gray-100: #1e293b;
+    --brand-gray-200: rgba(255, 255, 255, 0.10);
+    --brand-gray-300: rgba(255, 255, 255, 0.15);
+    --brand-gray-400: #64748b;
+    --brand-gray-500: #94a3b8;
+    --brand-gray-600: #cbd5e1;
+    --brand-gray-700: #e2e8f0;
+    --brand-gray-800: #f1f5f9;
+    --brand-gray-900: #f8fafc;
+    --brand-blue-light: #1e3a5f;
+    --brand-indigo-light: #312e81;
+    --brand-emerald-light: #064e3b;
+    --brand-amber-light: #451a03;
+    --brand-rose-light: #4c0519;
+    --brand-violet-light: #2e1065;
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.10);
+}
+
+/* Global dark mode body background */
+[data-theme="dark"] body {
+    background: #0f172a;
+    color: #f1f5f9;
+}
+
 /* ─── Global Keyframes ──────────────────────────────────────────── */
 @keyframes fadeInUp {
     from {

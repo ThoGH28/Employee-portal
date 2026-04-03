@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { Card, Upload, Button, message, Spin, Table, Space, Popconfirm, Tabs } from 'antd'
-import { UploadOutlined, DeleteOutlined, FileTextOutlined, TeamOutlined } from '@ant-design/icons'
+import { UploadOutlined, DeleteOutlined, FileTextOutlined, TeamOutlined, AuditOutlined } from '@ant-design/icons'
 import { documentService } from '../../shared/services/documentService'
 import { formatDate } from '../../shared/utils/helpers'
 import PayslipManagement from './PayslipManagement'
 import EmployeeManagement from './EmployeeManagement'
+import { LoginLogs } from './LoginLogs'
 import styles from './AdminPanel.module.css'
 
 interface Document {
@@ -157,6 +158,15 @@ export const AdminPanel: React.FC = () => {
                             </>
                         ),
                         children: <EmployeeManagement />,
+                    },
+                    {
+                        key: 'login-logs',
+                        label: (
+                            <>
+                                <AuditOutlined /> Log đăng nhập
+                            </>
+                        ),
+                        children: <LoginLogs />,
                     },
                 ]}
             />

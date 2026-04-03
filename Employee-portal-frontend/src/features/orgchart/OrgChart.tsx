@@ -13,15 +13,7 @@ import type { OrgChartNode, DepartmentCount } from '../../shared/types/orgChart'
 import { useAuthStore } from '../../shared/context/store';
 import { isAdminOrHR } from '../../shared/utils/permissions';
 import styles from './OrgChart.module.css';
-
-const DEPARTMENT_LABELS: Record<string, string> = {
-    hr: 'Nhân sự',
-    it: 'Công nghệ Thông tin',
-    sales: 'Kinh doanh',
-    marketing: 'Marketing',
-    operations: 'Vận hành',
-    finance: 'Tài chính',
-};
+import { useI18n } from '../../shared/context/i18n';
 
 const DEPARTMENT_COLORS: Record<string, string> = {
     hr: '#f56a00',
@@ -95,8 +87,8 @@ const OrgNode: React.FC<{ node: OrgChartNode }> = ({ node }) => {
 };
 
 /* ── Main page component ────────────────────────────────────────────────── */
-export const OrgChart: React.FC = () => {
-    const { user } = useAuthStore();
+export const OrgChart: React.FC = () => {    const t = useI18n();
+    const DEPARTMENT_LABELS = t.orgChart.departments as Record<string, string>;    const { user } = useAuthStore();
     const canViewAll = isAdminOrHR(user);
     const userDept = user?.department;
 
@@ -171,13 +163,13 @@ export const OrgChart: React.FC = () => {
     return (
         <div className={styles.orgChartPage}>
             <div className={styles.header}>
-                <h1><ApartmentOutlined /> Sơ đồ Tổ chức</h1>
+                <h1><ApartmentOutlined /> {t.orgChart.pageTitle}</h1>
                 <p>
                     {canViewAll
-                        ? 'Xem cơ cấu tổ chức công ty theo phòng ban'
+                        ? t.orgChart.subtitleAll
                         : userDept
-                            ? `Sơ đồ tổ chức phòng ${DEPARTMENT_LABELS[userDept] || userDept}`
-                            : 'Sơ đồ tổ chức phòng ban của bạn'
+                            ? t.orgChart.subtitleDept.replace('{dept}', DEPARTMENT_LABELS[userDept] || userDept)
+                            : t.orgChart.subtitleMine
                     }
                 </p>
             </div>
@@ -189,7 +181,7 @@ export const OrgChart: React.FC = () => {
                         className={`${styles.deptBadge} ${!selectedDepartment ? styles.deptBadgeActive : ''}`}
                         onClick={() => setSelectedDepartment(undefined)}
                     >
-                        Tất cả Phòng ban
+                        {t.orgChart.allDepts}
                     </div>
                     {departments?.map((dept: DepartmentCount) => (
                         <div
@@ -205,10 +197,10 @@ export const OrgChart: React.FC = () => {
 
             {/* Zoom controls */}
             <div className={styles.zoomControls}>
-                <Tooltip title="Thu nhỏ"><button onClick={() => setScale((s) => clampScale(s - ZOOM_STEP))}><ZoomOutOutlined /></button></Tooltip>
+                <Tooltip title={t.orgChart.zoomOut}><button onClick={() => setScale((s) => clampScale(s - ZOOM_STEP))}><ZoomOutOutlined /></button></Tooltip>
                 <span className={styles.zoomLabel}>{Math.round(scale * 100)}%</span>
-                <Tooltip title="Phóng to"><button onClick={() => setScale((s) => clampScale(s + ZOOM_STEP))}><ZoomInOutlined /></button></Tooltip>
-                <Tooltip title="Đặt lại"><button onClick={resetView}><ExpandOutlined /></button></Tooltip>
+                <Tooltip title={t.orgChart.zoomIn}><button onClick={() => setScale((s) => clampScale(s + ZOOM_STEP))}><ZoomInOutlined /></button></Tooltip>
+                <Tooltip title={t.orgChart.resetView}><button onClick={resetView}><ExpandOutlined /></button></Tooltip>
             </div>
 
             {/* Chart viewport — zoom & pan */}
@@ -237,7 +229,7 @@ export const OrgChart: React.FC = () => {
                         ))}
                     </div>
                 ) : (
-                    <Empty description="Không có dữ liệu tổ chức" />
+                    <Empty description={t.orgChart.noData} />
                 )}
             </div>
         </div>

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from apps.users.models import CustomUser, RefreshTokenLog
+from apps.users.models import CustomUser, RefreshTokenLog, LoginLog
 
 
 @admin.register(CustomUser)
@@ -25,3 +25,11 @@ class RefreshTokenLogAdmin(admin.ModelAdmin):
     list_filter = ['revoked', 'created_at']
     search_fields = ['user__username']
     readonly_fields = ['token', 'created_at']
+
+
+@admin.register(LoginLog)
+class LoginLogAdmin(admin.ModelAdmin):
+    list_display = ['username_attempted', 'user', 'ip_address', 'status', 'created_at']
+    list_filter = ['status', 'created_at']
+    search_fields = ['username_attempted', 'user__username', 'ip_address']
+    readonly_fields = ['user', 'username_attempted', 'ip_address', 'user_agent', 'status', 'created_at']

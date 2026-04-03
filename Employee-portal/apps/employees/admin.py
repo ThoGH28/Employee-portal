@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.employees.models import EmployeeProfile, LeaveRequest, HRAnnouncement
+from apps.employees.models import EmployeeProfile, LeaveRequest, HRAnnouncement, Payslip
 
 
 @admin.register(EmployeeProfile)
@@ -24,3 +24,11 @@ class HRAnnouncementAdmin(admin.ModelAdmin):
     list_filter = ['status', 'published_at']
     search_fields = ['title', 'content']
     readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(Payslip)
+class PayslipAdmin(admin.ModelAdmin):
+    list_display = ['employee', 'month_year', 'gross_salary', 'net_salary', 'status']
+    list_filter = ['status', 'month_year']
+    search_fields = ['employee__username', 'employee__email']
+    readonly_fields = ['gross_salary', 'total_deductions', 'net_salary', 'created_at', 'updated_at']

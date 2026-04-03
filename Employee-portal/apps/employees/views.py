@@ -15,6 +15,7 @@ from apps.employees.models import EmployeeProfile, LeaveRequest, HRAnnouncement,
 from apps.employees.serializers import (
     EmployeeProfileSerializer,
     EmployeeProfileBasicSerializer,
+    CreateEmployeeSerializer,
     LeaveRequestSerializer,
     LeaveApprovalSerializer,
     HRAnnouncementSerializer,
@@ -109,6 +110,16 @@ class EmployeeProfileViewSet(viewsets.ModelViewSet):
         serializer.save()
 
         return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], url_path='create_employee')
+    def create_employee(self, request):
+        """Admin/HR: create a new user account + employee profile in one step."""
+        if request.user.role not in ['admin', 'hr']:
+            return Response({'detail': 'Chỉ admin/HR mới có quyền thực hiện.'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = CreateEmployeeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        profile = serializer.save()
+        return Response(EmployeeProfileSerializer(profile).data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get', 'patch'])
     def my_profile(self, request):
@@ -223,11 +234,12 @@ class LeaveRequestViewSet(viewsets.ModelViewSet):
     def balance(self, request):
         """Get leave balance for current user"""
         user = request.user
-        # Calculate total, used, and remaining leave
+        # Calculate total, used, and remaining leave (count all approved leaves,
+        # including future ones, so balance reflects reservations immediately)
         approved_leaves = LeaveRequest.objects.filter(
             employee=user,
             status='approved'
-        ).exclude(start_date__gt=timezone.now().date())
+        )
         
         # Calculate days used (for approved leaves)
         used = sum(

@@ -3,10 +3,10 @@ LangChain conversational retrieval chain for AI chatbot
 """
 import logging
 from typing import List, Dict, Any
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory
 from langchain.chains import ConversationalRetrievalChain
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from django.conf import settings
 
 logger = logging.getLogger(__name__)

@@ -9,16 +9,25 @@ from rest_framework.exceptions import ValidationError
 from django.contrib.auth import authenticate
 import logging
 
-from apps.users.models import CustomUser
+from apps.users.models import CustomUser, LoginLog
 from apps.users.serializers import (
     UserSerializer,
     UserRegisterSerializer,
     LoginSerializer,
     RefreshTokenSerializer,
-    ChangePasswordSerializer
+    ChangePasswordSerializer,
+    LoginLogSerializer,
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _get_client_ip(request):
+    """Extract real client IP, respecting X-Forwarded-For from trusted proxies."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR', '')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR')
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -63,9 +72,29 @@ def login_view(request):
     """
     if request.method == 'POST':
         serializer = LoginSerializer(data=request.data)
+        ip = _get_client_ip(request)
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        username_attempted = request.data.get('email') or request.data.get('username', '')
+
         if serializer.is_valid():
-            logger.info(f"User logged in: {serializer.user.username}")
+            user = serializer.user
+            LoginLog.objects.create(
+                user=user,
+                username_attempted=username_attempted,
+                ip_address=ip,
+                user_agent=user_agent,
+                status='success',
+            )
+            logger.info(f"User logged in: {user.username}")
             return Response(serializer.data, status=status.HTTP_200_OK)
+
+        LoginLog.objects.create(
+            user=None,
+            username_attempted=username_attempted,
+            ip_address=ip,
+            user_agent=user_agent,
+            status='failed',
+        )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -182,3 +211,34 @@ def impersonate_view(request):
         'username': request.user.username,
     }
     return Response(tokens)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def login_logs_view(request):
+    """
+    Admin-only endpoint to retrieve login audit logs.
+    Supports optional query params: user_id, status (success|failed), page, page_size
+    """
+    if request.user.role != 'admin':
+        return Response({'detail': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    logs = LoginLog.objects.select_related('user').all()
+
+    user_id = request.query_params.get('user_id')
+    status_filter = request.query_params.get('status')
+    if user_id:
+        logs = logs.filter(user_id=user_id)
+    if status_filter in ('success', 'failed'):
+        logs = logs.filter(status=status_filter)
+
+    try:
+        page = max(1, int(request.query_params.get('page', 1)))
+        page_size = min(100, max(1, int(request.query_params.get('page_size', 20))))
+    except (ValueError, TypeError):
+        page, page_size = 1, 20
+
+    total = logs.count()
+    start = (page - 1) * page_size
+    serializer = LoginLogSerializer(logs[start:start + page_size], many=True)
+    return Response({'count': total, 'results': serializer.data})

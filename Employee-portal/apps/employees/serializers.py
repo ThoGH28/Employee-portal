@@ -3,8 +3,72 @@ Serializers for employee profile and leave management
 """
 from rest_framework import serializers
 from django.utils import timezone
+from django.db import transaction
+from django.contrib.auth.password_validation import validate_password
 from apps.employees.models import EmployeeProfile, LeaveRequest, HRAnnouncement, Payslip, AdministrativeRequest
+from apps.users.models import CustomUser
 from apps.users.serializers import UserSerializer
+
+
+class CreateEmployeeSerializer(serializers.Serializer):
+    """
+    Single serializer to create a CustomUser + EmployeeProfile atomically (Admin/HR only).
+    """
+    # --- User fields ---
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+    first_name = serializers.CharField(max_length=150, default='')
+    last_name = serializers.CharField(max_length=150, default='')
+    role = serializers.ChoiceField(choices=['admin', 'hr', 'employee'], default='employee')
+    phone_number = serializers.CharField(max_length=20, required=False, allow_blank=True, default='')
+
+    # --- Profile fields ---
+    department = serializers.ChoiceField(choices=['hr', 'it', 'sales', 'marketing', 'operations', 'finance'])
+    designation = serializers.CharField(max_length=100)
+    employee_id = serializers.CharField(max_length=50)
+    date_of_joining = serializers.DateField()
+    date_of_birth = serializers.DateField(required=False, allow_null=True)
+    address = serializers.CharField(required=False, allow_blank=True, default='')
+    bio = serializers.CharField(required=False, allow_blank=True, default='')
+
+    def validate_username(self, value):
+        if CustomUser.objects.filter(username=value).exists():
+            raise serializers.ValidationError('Tên đăng nhập đã tồn tại.')
+        return value
+
+    def validate_email(self, value):
+        if CustomUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError('Email đã được sử dụng.')
+        return value
+
+    def validate_employee_id(self, value):
+        if EmployeeProfile.objects.filter(employee_id=value).exists():
+            raise serializers.ValidationError('Mã nhân viên đã tồn tại.')
+        return value
+
+    @transaction.atomic
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password'],
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', ''),
+            role=validated_data.get('role', 'employee'),
+            phone_number=validated_data.get('phone_number', ''),
+        )
+        profile = EmployeeProfile.objects.create(
+            user=user,
+            department=validated_data['department'],
+            designation=validated_data['designation'],
+            employee_id=validated_data['employee_id'],
+            date_of_joining=validated_data['date_of_joining'],
+            date_of_birth=validated_data.get('date_of_birth'),
+            address=validated_data.get('address', ''),
+            bio=validated_data.get('bio', ''),
+        )
+        return profile
 
 
 class EmployeeProfileSerializer(serializers.ModelSerializer):
@@ -161,7 +225,8 @@ class PayslipSerializer(serializers.ModelSerializer):
 
 class PayslipCreateUpdateSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating and updating payslips (HR only)
+    Serializer for creating and updating payslips (HR only).
+    Accepts either a CustomUser UUID or an EmployeeProfile UUID for the employee field.
     """
     class Meta:
         model = Payslip
@@ -171,7 +236,31 @@ class PayslipCreateUpdateSerializer(serializers.ModelSerializer):
             'provident_fund', 'tax_deducted_at_source', 'insurance', 'other_deductions',
             'status', 'pdf_file'
         ]
-    
+
+    def validate_employee(self, value):
+        """Accept both CustomUser and EmployeeProfile UUIDs."""
+        from apps.users.models import CustomUser
+        # value is already resolved to a CustomUser instance by DRF's PrimaryKeyRelatedField
+        # but if validation failed it means the UUID doesn't exist in CustomUser.
+        # Try resolving it via EmployeeProfile.
+        return value
+
+    def to_internal_value(self, data):
+        """
+        If the employee UUID isn't a CustomUser pk, try resolving it as an EmployeeProfile id.
+        """
+        employee_raw = data.get('employee')
+        if employee_raw:
+            from apps.users.models import CustomUser
+            if not CustomUser.objects.filter(pk=employee_raw).exists():
+                try:
+                    profile = EmployeeProfile.objects.get(pk=employee_raw)
+                    data = data.copy()
+                    data['employee'] = str(profile.user_id)
+                except EmployeeProfile.DoesNotExist:
+                    pass
+        return super().to_internal_value(data)
+
     def create(self, validated_data):
         validated_data['created_by'] = self.context['request'].user
         return super().create(validated_data)

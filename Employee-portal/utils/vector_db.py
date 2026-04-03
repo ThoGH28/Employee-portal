@@ -4,8 +4,8 @@ Vector database utilities for document embedding and retrieval
 import logging
 import os
 from typing import List, Dict, Any, Optional
-from langchain.vectorstores import Chroma
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain_openai import OpenAIEmbeddings
 from django.conf import settings
 
 logger = logging.getLogger(__name__)

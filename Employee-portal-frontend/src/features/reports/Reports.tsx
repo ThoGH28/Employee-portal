@@ -18,6 +18,7 @@ import type { Payslip } from '../../shared/types/payslip'
 import type { Employee, LeaveRequest } from '../../shared/types'
 import type { AdministrativeRequest } from '../../shared/types/adminRequest'
 import styles from './Reports.module.css'
+import { useI18n } from '../../shared/context/i18n'
 
 const { Title, Text } = Typography
 
@@ -73,8 +74,7 @@ const fmtCurrency = (n: number) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(n)
 
 /* ── Main component ─────────────────────────────────────────────── */
-export const Reports: React.FC = () => {
-    const { data: payslips = [], isLoading: loadingPayslips } = useQuery<Payslip[]>({
+export const Reports: React.FC = () => {    const t = useI18n();    const { data: payslips = [], isLoading: loadingPayslips } = useQuery<Payslip[]>({
         queryKey: ['reports-payslips'],
         queryFn: async () => {
             const res = await api.get('/employees/payslips/', { params: { page_size: 1000 } })
@@ -120,7 +120,7 @@ export const Reports: React.FC = () => {
     const deptMap = useMemo(() => {
         const map = new Map<string, number>()
         employees.forEach((e) => {
-            const dept = e.department || 'Chưa phân công'
+            const dept = e.department || 'N/A'
             map.set(dept, (map.get(dept) ?? 0) + 1)
         })
         return [...map.entries()]
@@ -154,13 +154,13 @@ export const Reports: React.FC = () => {
             if (p.status in statusMap) statusMap[p.status as keyof typeof statusMap]++
         })
         const payByStatus = [
-            { label: 'Bản nháp', value: statusMap.draft, color: '#94a3b8' },
-            { label: 'Đã hoàn thiện', value: statusMap.finalized, color: '#6366f1' },
-            { label: 'Đã phát hành', value: statusMap.distributed, color: '#22c55e' },
+            { label: t.reports.payByStatus.draft, value: statusMap.draft, color: '#94a3b8' },
+            { label: t.reports.payByStatus.finalized, value: statusMap.finalized, color: '#6366f1' },
+            { label: t.reports.payByStatus.distributed, value: statusMap.distributed, color: '#22c55e' },
         ]
 
         return { totalPay, avgSalary, payByMonth, payByStatus }
-    }, [payslips])
+    }, [payslips, t])
 
     /* ── Derived: Leaves ────────────────────────────────────────── */
     const {
@@ -173,10 +173,10 @@ export const Reports: React.FC = () => {
             if (s in statusCounts) statusCounts[s]++
         })
         const leaveByStatus = [
-            { label: 'Chờ duyệt', value: statusCounts.pending, color: '#f59e0b' },
-            { label: 'Đã duyệt', value: statusCounts.approved, color: '#22c55e' },
-            { label: 'Từ chối', value: statusCounts.rejected, color: '#ef4444' },
-            { label: 'Đã hủy', value: statusCounts.cancelled, color: '#94a3b8' },
+            { label: t.reports.leaveByStatus.pending, value: statusCounts.pending, color: '#f59e0b' },
+            { label: t.reports.leaveByStatus.approved, value: statusCounts.approved, color: '#22c55e' },
+            { label: t.reports.leaveByStatus.rejected, value: statusCounts.rejected, color: '#ef4444' },
+            { label: t.reports.leaveByStatus.cancelled, value: statusCounts.cancelled, color: '#94a3b8' },
         ]
 
         const typeMap = new Map<string, number>()
@@ -189,7 +189,7 @@ export const Reports: React.FC = () => {
             .map(([label, value]) => ({ label, value, color: '#0ea5e9' }))
 
         return { leaveByStatus, leaveByType }
-    }, [leaveData])
+    }, [leaveData, t])
 
     /* ── Derived: Admin requests ────────────────────────────────── */
     const {
@@ -202,11 +202,11 @@ export const Reports: React.FC = () => {
             if (s in statusCounts) statusCounts[s]++
         })
         const requestByStatus = [
-            { label: 'Chờ xử lý', value: statusCounts.pending, color: '#f59e0b' },
-            { label: 'Đang xử lý', value: statusCounts.in_progress, color: '#6366f1' },
-            { label: 'Đã duyệt', value: statusCounts.approved, color: '#22c55e' },
-            { label: 'Từ chối', value: statusCounts.rejected, color: '#ef4444' },
-            { label: 'Hoàn thành', value: statusCounts.completed, color: '#14b8a6' },
+            { label: t.reports.requestByStatus.pending, value: statusCounts.pending, color: '#f59e0b' },
+            { label: t.reports.requestByStatus.in_progress, value: statusCounts.in_progress, color: '#6366f1' },
+            { label: t.reports.requestByStatus.approved, value: statusCounts.approved, color: '#22c55e' },
+            { label: t.reports.requestByStatus.rejected, value: statusCounts.rejected, color: '#ef4444' },
+            { label: t.reports.requestByStatus.completed, value: statusCounts.completed, color: '#14b8a6' },
         ]
 
         const typeMap = new Map<string, number>()
@@ -219,38 +219,38 @@ export const Reports: React.FC = () => {
             .map(([label, value]) => ({ label, value, color: '#8b5cf6' }))
 
         return { requestByStatus, requestByType }
-    }, [requestData])
+    }, [requestData, t])
 
     /* ── Tables ─────────────────────────────────────────────────── */
     const leaveColumns = [
-        { title: 'Nhân viên', dataIndex: 'employee_name', key: 'employee_name' },
+        { title: t.reports.colEmployee, dataIndex: 'employee_name', key: 'employee_name' },
         {
-            title: 'Loại nghỉ', dataIndex: 'leave_type', key: 'leave_type',
+            title: t.reports.colLeaveType, dataIndex: 'leave_type', key: 'leave_type',
             render: (v: string) => leaveTypeLabel(v),
         },
-        { title: 'Bắt đầu', dataIndex: 'start_date', key: 'start_date' },
-        { title: 'Kết thúc', dataIndex: 'end_date', key: 'end_date' },
-        { title: 'Số ngày', dataIndex: 'days_count', key: 'days_count' },
+        { title: t.reports.colStart, dataIndex: 'start_date', key: 'start_date' },
+        { title: t.reports.colEnd, dataIndex: 'end_date', key: 'end_date' },
+        { title: t.reports.colDays, dataIndex: 'days_count', key: 'days_count' },
         {
-            title: 'Trạng thái', dataIndex: 'status', key: 'status',
+            title: t.reports.colStatus, dataIndex: 'status', key: 'status',
             render: (v: string) => leaveStatusTag(v),
         },
     ]
 
     const requestColumns = [
-        { title: 'Nhân viên', dataIndex: 'employee_name', key: 'employee_name' },
-        { title: 'Loại yêu cầu', dataIndex: 'request_type_display', key: 'request_type_display' },
-        { title: 'Tiêu đề', dataIndex: 'title', key: 'title', ellipsis: true },
+        { title: t.reports.colEmployee, dataIndex: 'employee_name', key: 'employee_name' },
+        { title: t.reports.colReqType, dataIndex: 'request_type_display', key: 'request_type_display' },
+        { title: t.reports.colTitle, dataIndex: 'title', key: 'title', ellipsis: true },
         {
-            title: 'Ưu tiên', dataIndex: 'priority', key: 'priority',
+            title: t.reports.colPriority, dataIndex: 'priority', key: 'priority',
             render: (v: string) => priorityTag(v),
         },
         {
-            title: 'Trạng thái', dataIndex: 'status', key: 'status',
+            title: t.reports.colStatus, dataIndex: 'status', key: 'status',
             render: (v: string) => requestStatusTag(v),
         },
         {
-            title: 'Ngày tạo', dataIndex: 'created_at', key: 'created_at',
+            title: t.reports.colCreated, dataIndex: 'created_at', key: 'created_at',
             render: (v: string) => v ? v.split('T')[0] : '',
         },
     ]
@@ -259,7 +259,7 @@ export const Reports: React.FC = () => {
     if (isLoading) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 360 }}>
-                <Spin size="large" tip="Đang tải báo cáo..." />
+                <Spin size="large" tip={t.reports.loading} />
             </div>
         )
     }
@@ -272,7 +272,7 @@ export const Reports: React.FC = () => {
     const tabs = [
         {
             key: 'overview',
-            label: <span><BarChartOutlined /> Tổng quan</span>,
+            label: <span><BarChartOutlined /> {t.reports.tabOverview}</span>,
             children: (
                 <Row gutter={[20, 20]}>
                     {/* KPI cards */}
@@ -283,7 +283,7 @@ export const Reports: React.FC = () => {
                                     <TeamOutlined />
                                 </div>
                                 <div className={styles.kpiText}>
-                                    <Statistic title="Tổng nhân viên" value={employees.length} />
+                                    <Statistic title={t.reports.kpiTotalEmp} value={employees.length} />
                                 </div>
                             </div>
                         </Card>
@@ -296,7 +296,7 @@ export const Reports: React.FC = () => {
                                 </div>
                                 <div className={styles.kpiText}>
                                     <Statistic
-                                        title="Tổng quỹ lương"
+                                        title={t.reports.kpiTotalPay}
                                         value={totalPay}
                                         formatter={(v) => fmtCurrency(Number(v))}
                                     />
@@ -311,7 +311,7 @@ export const Reports: React.FC = () => {
                                     <CalendarOutlined />
                                 </div>
                                 <div className={styles.kpiText}>
-                                    <Statistic title="Yêu cầu nghỉ phép" value={leaveData.length} suffix="đơn" />
+                                    <Statistic title={t.reports.kpiLeaveReqs} value={leaveData.length} suffix={t.reports.suffix} />
                                 </div>
                             </div>
                         </Card>
@@ -323,7 +323,7 @@ export const Reports: React.FC = () => {
                                     <FileProtectOutlined />
                                 </div>
                                 <div className={styles.kpiText}>
-                                    <Statistic title="Yêu cầu hành chính" value={requestData.length} suffix="đơn" />
+                                    <Statistic title={t.reports.kpiAdminReqs} value={requestData.length} suffix={t.reports.suffix} />
                                 </div>
                             </div>
                         </Card>
@@ -331,7 +331,7 @@ export const Reports: React.FC = () => {
 
                     {/* Summary blocks */}
                     <Col xs={24} md={12}>
-                        <Card className={styles.sectionCard} title={<><CalendarOutlined style={{ color: '#f59e0b', marginRight: 8 }} />Trạng thái nghỉ phép</>}>
+                        <Card className={styles.sectionCard} title={<><CalendarOutlined style={{ color: '#f59e0b', marginRight: 8 }} />{t.reports.leaveStatusTitle}</>}>
                             <div className={styles.statusGrid}>
                                 {leaveByStatus.map((s) => (
                                     <div key={s.label} className={styles.statusItem}>
@@ -343,7 +343,7 @@ export const Reports: React.FC = () => {
                         </Card>
                     </Col>
                     <Col xs={24} md={12}>
-                        <Card className={styles.sectionCard} title={<><FileProtectOutlined style={{ color: '#8b5cf6', marginRight: 8 }} />Trạng thái yêu cầu hành chính</>}>
+                        <Card className={styles.sectionCard} title={<><FileProtectOutlined style={{ color: '#8b5cf6', marginRight: 8 }} />{t.reports.adminStatusTitle}</>}>
                             <div className={styles.statusGrid}>
                                 {requestByStatus.map((s) => (
                                     <div key={s.label} className={styles.statusItem}>
@@ -359,12 +359,12 @@ export const Reports: React.FC = () => {
                     <Col xs={24}>
                         <Card
                             className={styles.sectionCard}
-                            title={<><RiseOutlined style={{ color: '#22c55e', marginRight: 8 }} />Xu hướng quỹ lương 6 tháng gần nhất</>}
+                            title={<><RiseOutlined style={{ color: '#22c55e', marginRight: 8 }} />{t.reports.payrollTrend}</>}
                         >
                             {payByMonth.length > 0 ? (
                                 <TrendChart items={payByMonth} unit="M" />
                             ) : (
-                                <Empty description="Chưa có dữ liệu phiếu lương" />
+                                <Empty description={t.reports.noPayslipData} />
                             )}
                         </Card>
                     </Col>
@@ -373,31 +373,31 @@ export const Reports: React.FC = () => {
         },
         {
             key: 'employees',
-            label: <span><TeamOutlined /> Nhân sự</span>,
+            label: <span><TeamOutlined /> {t.reports.tabEmployees}</span>,
             children: (
                 <Row gutter={[20, 20]}>
                     <Col xs={24} md={12}>
-                        <Card className={styles.sectionCard} title="Nhân viên theo phòng ban">
+                        <Card className={styles.sectionCard} title={t.reports.empByDept}>
                             {deptMap.length > 0 ? (
                                 <HBarChart items={deptMap} max={maxDept} />
                             ) : (
-                                <Empty description="Không có dữ liệu" />
+                                <Empty description={t.reports.noData} />
                             )}
                         </Card>
                     </Col>
                     <Col xs={24} md={12}>
-                        <Card className={styles.sectionCard} title="Thống kê nhanh">
+                        <Card className={styles.sectionCard} title={t.reports.quickStats}>
                             <Row gutter={[16, 16]}>
                                 <Col span={12}>
-                                    <Statistic title="Tổng nhân viên" value={employees.length} prefix={<TeamOutlined />} />
+                                    <Statistic title={t.reports.kpiTotalEmp} value={employees.length} prefix={<TeamOutlined />} />
                                 </Col>
                                 <Col span={12}>
-                                    <Statistic title="Số phòng ban" value={deptMap.length} prefix={<BarChartOutlined />} />
+                                    <Statistic title={t.reports.totalDepts} value={deptMap.length} prefix={<BarChartOutlined />} />
                                 </Col>
                                 <Col span={24}>
                                     <Divider style={{ margin: '8px 0' }} />
                                     <Text type="secondary" style={{ fontSize: 13 }}>
-                                        Lương trung bình: <Text strong>{fmtCurrency(avgSalary)}</Text>
+                                        {t.reports.avgSalaryLabel} <Text strong>{fmtCurrency(avgSalary)}</Text>
                                     </Text>
                                 </Col>
                             </Row>
@@ -408,27 +408,27 @@ export const Reports: React.FC = () => {
         },
         {
             key: 'leaves',
-            label: <span><CalendarOutlined /> Nghỉ phép</span>,
+            label: <span><CalendarOutlined /> {t.reports.tabLeaves}</span>,
             children: (
                 <Row gutter={[20, 20]}>
                     <Col xs={24} md={12}>
-                        <Card className={styles.sectionCard} title="Theo trạng thái">
+                        <Card className={styles.sectionCard} title={t.reports.leaveStatusTitle}>
                             <HBarChart items={leaveByStatus} max={Math.max(...leaveByStatus.map((s) => s.value), 1)} />
                         </Card>
                     </Col>
                     <Col xs={24} md={12}>
-                        <Card className={styles.sectionCard} title="Theo loại nghỉ">
+                        <Card className={styles.sectionCard} title={t.reports.colLeaveType}>
                             {leaveByType.length > 0 ? (
                                 <HBarChart items={leaveByType} max={maxLeaveType} />
                             ) : (
-                                <Empty description="Không có dữ liệu" />
+                                <Empty description={t.reports.noData} />
                             )}
                         </Card>
                     </Col>
                     <Col xs={24}>
-                        <Card className={styles.sectionCard} title="Danh sách yêu cầu nghỉ phép">
+                        <Card className={styles.sectionCard} title={t.reports.tabLeaves}>
                             {leaveData.length === 0 ? (
-                                <Empty description="Chưa có yêu cầu nghỉ phép nào" />
+                                <Empty description={t.reports.noData} />
                             ) : (
                                 <Table
                                     dataSource={leaveData}
@@ -446,35 +446,35 @@ export const Reports: React.FC = () => {
         },
         {
             key: 'payroll',
-            label: <span><DollarOutlined /> Lương</span>,
+            label: <span><DollarOutlined /> {t.reports.tabPayslips}</span>,
             children: (
                 <Row gutter={[20, 20]}>
                     <Col xs={24} md={8}>
                         <Card className={styles.sectionCard} bodyStyle={{ padding: 20 }}>
-                            <Statistic title="Tổng quỹ lương" value={totalPay} formatter={(v) => fmtCurrency(Number(v))} prefix={<DollarOutlined />} />
+                            <Statistic title={t.reports.kpiTotalPay} value={totalPay} formatter={(v) => fmtCurrency(Number(v))} prefix={<DollarOutlined />} />
                         </Card>
                     </Col>
                     <Col xs={24} md={8}>
                         <Card className={styles.sectionCard} bodyStyle={{ padding: 20 }}>
-                            <Statistic title="Lương trung bình" value={avgSalary} formatter={(v) => fmtCurrency(Number(v))} />
+                            <Statistic title={t.reports.avgSalaryLabel} value={avgSalary} formatter={(v) => fmtCurrency(Number(v))} />
                         </Card>
                     </Col>
                     <Col xs={24} md={8}>
                         <Card className={styles.sectionCard} bodyStyle={{ padding: 20 }}>
-                            <Statistic title="Tổng số phiếu lương" value={payslips.length} suffix="phiếu" />
+                            <Statistic title={t.reports.tabPayslips} value={payslips.length} suffix={t.reports.suffix} />
                         </Card>
                     </Col>
                     <Col xs={24} md={12}>
-                        <Card className={styles.sectionCard} title="Theo trạng thái phiếu lương">
+                        <Card className={styles.sectionCard} title={t.reports.adminStatusTitle}>
                             <HBarChart items={payByStatus} max={maxPayStatus} />
                         </Card>
                     </Col>
                     <Col xs={24} md={12}>
-                        <Card className={styles.sectionCard} title="Xu hướng tổng lương theo tháng">
+                        <Card className={styles.sectionCard} title={t.reports.payrollTrend}>
                             {payByMonth.length > 0 ? (
                                 <TrendChart items={payByMonth} unit="M" />
                             ) : (
-                                <Empty description="Chưa có dữ liệu" />
+                                <Empty description={t.reports.noData} />
                             )}
                         </Card>
                     </Col>
@@ -483,27 +483,27 @@ export const Reports: React.FC = () => {
         },
         {
             key: 'requests',
-            label: <span><FileProtectOutlined /> Yêu cầu</span>,
+            label: <span><FileProtectOutlined /> {t.reports.tabRequests}</span>,
             children: (
                 <Row gutter={[20, 20]}>
                     <Col xs={24} md={12}>
-                        <Card className={styles.sectionCard} title="Theo trạng thái">
+                        <Card className={styles.sectionCard} title={t.reports.adminStatusTitle}>
                             <HBarChart items={requestByStatus} max={Math.max(...requestByStatus.map((s) => s.value), 1)} />
                         </Card>
                     </Col>
                     <Col xs={24} md={12}>
-                        <Card className={styles.sectionCard} title="Theo loại yêu cầu">
+                        <Card className={styles.sectionCard} title={t.reports.colReqType}>
                             {requestByType.length > 0 ? (
                                 <HBarChart items={requestByType} max={maxReqType} />
                             ) : (
-                                <Empty description="Không có dữ liệu" />
+                                <Empty description={t.reports.noData} />
                             )}
                         </Card>
                     </Col>
                     <Col xs={24}>
-                        <Card className={styles.sectionCard} title="Danh sách yêu cầu hành chính">
+                        <Card className={styles.sectionCard} title={t.reports.tabRequests}>
                             {requestData.length === 0 ? (
-                                <Empty description="Chưa có yêu cầu hành chính nào" />
+                                <Empty description={t.reports.noData} />
                             ) : (
                                 <Table
                                     dataSource={requestData}
@@ -531,10 +531,10 @@ export const Reports: React.FC = () => {
                     </div>
                     <div>
                         <Title level={2} style={{ color: '#fff', margin: 0 }}>
-                            Báo cáo
+                            {t.reports.pageTitle}
                         </Title>
                         <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14 }}>
-                            Tổng hợp dữ liệu nhân sự, lương, nghỉ phép và yêu cầu hành chính
+                            {t.reports.subtitle}
                         </Text>
                     </div>
                 </div>

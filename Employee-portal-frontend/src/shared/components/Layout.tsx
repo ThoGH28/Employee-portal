@@ -3,6 +3,7 @@ import { Layout, Menu, Dropdown, Avatar, Button, Space } from 'antd'
 import { LogoutOutlined, UserOutlined, SettingOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DollarOutlined, FileTextOutlined, TeamOutlined, ApartmentOutlined, FileProtectOutlined, SolutionOutlined, DashboardOutlined, BarChartOutlined, QuestionCircleOutlined, CalendarOutlined } from '@ant-design/icons'
 import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../context/store'
+import { useI18n } from '../context/i18n'
 import { getInitials } from '../utils/helpers'
 import { getSidebarVisibility } from '../utils/permissions'
 import { useLogout } from '../hooks/queries'
@@ -15,25 +16,26 @@ interface AppLayoutProps {
     children: React.ReactNode
 }
 
-const allSidebarItems = [
-    { key: 'dashboard', label: 'Trang chủ', icon: <DashboardOutlined />, visKey: 'dashboard' as const },
-    { key: 'profile', label: 'Hồ sơ cá nhân', icon: <SolutionOutlined />, visKey: 'profile' as const },
-    { key: 'payslips', label: 'Phiếu lương', icon: <DollarOutlined />, visKey: 'payslips' as const },
-    { key: 'leave', label: 'Nghỉ phép', icon: <CalendarOutlined />, visKey: 'dashboard' as const },
-    { key: 'requests', label: 'Yêu cầu', icon: <FileProtectOutlined />, visKey: 'requests' as const },
-    { key: 'leave-approval', label: 'Duyệt Nghỉ Phép', icon: <CalendarOutlined />, visKey: 'leaveApproval' as const },
-    { key: 'org-chart', label: 'Sơ đồ tổ chức', icon: <ApartmentOutlined />, visKey: 'orgChart' as const },
-    { key: 'documents', label: 'Tài liệu', icon: <FileTextOutlined />, visKey: 'documents' as const },
-    { key: 'reports', label: 'Báo cáo', icon: <BarChartOutlined />, visKey: 'reports' as const },
-    { key: 'admin', label: 'Quản trị', icon: <TeamOutlined />, visKey: 'admin' as const },
-    { key: 'help', label: 'Hướng dẫn', icon: <QuestionCircleOutlined />, visKey: 'help' as const },
-]
+const sidebarKeys = [
+    { key: 'dashboard', icon: <DashboardOutlined />, visKey: 'dashboard' as const },
+    { key: 'profile', icon: <SolutionOutlined />, visKey: 'profile' as const },
+    { key: 'payslips', icon: <DollarOutlined />, visKey: 'payslips' as const },
+    { key: 'leave', icon: <CalendarOutlined />, visKey: 'dashboard' as const },
+    { key: 'requests', icon: <FileProtectOutlined />, visKey: 'requests' as const },
+    { key: 'leave-approval', icon: <CalendarOutlined />, visKey: 'leaveApproval' as const },
+    { key: 'org-chart', icon: <ApartmentOutlined />, visKey: 'orgChart' as const },
+    { key: 'documents', icon: <FileTextOutlined />, visKey: 'documents' as const },
+    { key: 'reports', icon: <BarChartOutlined />, visKey: 'reports' as const },
+    { key: 'admin', icon: <TeamOutlined />, visKey: 'admin' as const },
+    { key: 'help', icon: <QuestionCircleOutlined />, visKey: 'help' as const },
+] as const
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     const navigate = useNavigate()
     const location = useLocation()
     const { user } = useAuthStore()
     const { mutate: logoutMutate } = useLogout()
+    const t = useI18n()
     const [collapsed, setCollapsed] = React.useState(false)
     const [isMobile, setIsMobile] = useState(false)
 
@@ -51,12 +53,27 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
     const currentKey = location.pathname.replace('/', '') || 'dashboard'
 
+    const navLabels: Record<string, string> = {
+        dashboard: t.layout.nav.dashboard,
+        profile: t.layout.nav.profile,
+        payslips: t.layout.nav.payslips,
+        leave: t.layout.nav.leave,
+        requests: t.layout.nav.requests,
+        'leave-approval': t.layout.nav.leaveApproval,
+        'org-chart': t.layout.nav.orgChart,
+        documents: t.layout.nav.documents,
+        reports: t.layout.nav.reports,
+        admin: t.layout.nav.admin,
+        help: t.layout.nav.help,
+    }
+
     const sidebarItems = useMemo(() => {
         const visibility = getSidebarVisibility(user)
-        return allSidebarItems
+        return sidebarKeys
             .filter((item) => visibility[item.visKey])
-            .map(({ visKey, ...rest }) => rest)
-    }, [user])
+            .map(({ visKey: _v, key, icon }) => ({ key, icon, label: navLabels[key] ?? key }))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user, t])
 
     const handleLogout = () => {
         logoutMutate(undefined, {
@@ -75,20 +92,20 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         {
             key: 'profile',
             icon: <UserOutlined />,
-            label: 'Hồ sơ',
+            label: t.layout.userMenu.profile,
             onClick: () => navigate('/profile'),
         },
         {
             key: 'settings',
             icon: <SettingOutlined />,
-            label: 'Cài đặt',
+            label: t.layout.userMenu.settings,
             onClick: () => navigate('/settings'),
         },
         { type: 'divider' as const },
         {
             key: 'logout',
             icon: <LogoutOutlined />,
-            label: 'Đăng xuất',
+            label: t.layout.userMenu.logout,
             onClick: handleLogout,
         },
     ]
@@ -120,7 +137,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                 <div className={`${styles.logo} ${collapsed ? styles.logoCollapsed : ''}`}>
                     {collapsed
                         ? <span className={styles.logoIcon}>⚡</span>
-                        : <><span className={styles.logoGradient}>Cổng</span>{' Nhân viên'}</>}
+                        : <><span className={styles.logoGradient}>{t.layout.logoPrefix}</span>{' '}{t.layout.logoName}</>}
                 </div>
                 <Menu
                     theme="dark"

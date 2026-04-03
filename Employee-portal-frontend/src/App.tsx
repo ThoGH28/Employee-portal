@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { ConfigProvider } from 'antd'
+import { ConfigProvider, theme } from 'antd'
 import { useAuthStore } from './shared/context/store'
+import { useSettingsStore } from './shared/context/settingsStore'
 import { isAuthenticated } from './shared/utils/storage'
 import { ProtectedRoute, AdminRoute, RoleRoute } from './shared/components/ProtectedRoute'
 import { LayoutShell } from './shared/components/Layout'
@@ -15,6 +16,7 @@ import { DocumentSearch } from './features/documents/DocumentSearch'
 import PayslipList from './features/payslips/PayslipList'
 import { AdminPanel } from './features/admin/AdminPanel'
 import { Profile } from './features/profile/Profile'
+import { Settings } from './features/settings/Settings'
 import { AdminRequests } from './features/requests/AdminRequests'
 import { OrgChart } from './features/orgchart/OrgChart'
 import { Reports } from './features/reports/Reports'
@@ -24,6 +26,16 @@ import antdTheme from './shared/styles/theme'
 
 export const App: React.FC = () => {
     const { loadUserFromStorage } = useAuthStore()
+    const { themeMode } = useSettingsStore()
+
+    // Resolve effective dark mode (supports 'system')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const isDark = themeMode === 'dark' || (themeMode === 'system' && prefersDark)
+
+    // Toggle data-theme attribute for CSS variable overrides
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
+    }, [isDark])
 
     // Load user from storage on app mount
     useEffect(() => {
@@ -32,9 +44,14 @@ export const App: React.FC = () => {
         }
     }, [loadUserFromStorage])
 
+    const computedTheme = {
+        ...antdTheme,
+        algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
+    }
+
     return (
         <QueryClientProvider client={queryClient}>
-            <ConfigProvider theme={antdTheme}>
+            <ConfigProvider theme={computedTheme}>
                 <BrowserRouter>
                     <Routes>
                         {/* Public routes */}
@@ -64,6 +81,7 @@ export const App: React.FC = () => {
                                     </RoleRoute>
                                 }
                             />
+                            <Route path="/settings" element={<Settings />} />
                             <Route path="/help" element={<UserManual />} />
                             <Route
                                 path="/admin"

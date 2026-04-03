@@ -3,6 +3,7 @@ import { Form, Input, Button, message } from 'antd'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useLogin } from '../../shared/hooks/queries'
 import { useAuthStore } from '../../shared/context/store'
+import { useI18n } from '../../shared/context/i18n'
 import { apiClient } from '../../shared/services/api'
 import { setTokenToStorage, setRefreshTokenToStorage, isAuthenticated } from '../../shared/utils/storage'
 import styles from './LoginPage.module.css'
@@ -13,6 +14,7 @@ export const LoginPage: React.FC = () => {
     const location = useLocation()
     const { setUser } = useAuthStore()
     const { mutate: login, isPending } = useLogin()
+    const t = useI18n()
 
     // Redirect to dashboard if already authenticated
     React.useEffect(() => {
@@ -28,13 +30,13 @@ export const LoginPage: React.FC = () => {
                 setRefreshTokenToStorage(response.data.refresh)
                 apiClient.setToken(response.data.access)
                 setUser(response.data.user)
-                message.success('Đăng nhập thành công!')
+                message.success(t.login.loginSuccess)
 
                 const from = location.state?.from?.pathname || '/dashboard'
                 navigate(from)
             },
             onError: (error: any) => {
-                const errorMessage = error.response?.data?.message || 'Đăng nhập thất bại'
+                const errorMessage = error.response?.data?.message || t.login.loginError
                 message.error(errorMessage)
             },
         })
@@ -57,8 +59,8 @@ export const LoginPage: React.FC = () => {
                 {/* Login Card */}
                 <div className={styles.loginCard}>
                     <div className={styles.cardHeader}>
-                        <h2 className={styles.title}>Chào Mừng Trở Lại</h2>
-                        <p className={styles.subtitle}>Vui lòng nhập thông tin đăng nhập để tiếp tục.</p>
+                        <h2 className={styles.title}>{t.login.title}</h2>
+                        <p className={styles.subtitle}>{t.login.subtitle}</p>
                     </div>
 
                     <Form
@@ -72,13 +74,13 @@ export const LoginPage: React.FC = () => {
                         <Form.Item
                             name="username"
                             rules={[
-                                { required: true, message: 'Vui lòng nhập tên đăng nhập' },
+                                { required: true, message: t.login.usernameRequired },
                             ]}
                             className={styles.formField}
-                            label={<span className={styles.fieldLabel}>Tên đăng nhập</span>}
+                            label={<span className={styles.fieldLabel}>{t.login.usernameLabel}</span>}
                         >
                             <Input
-                                placeholder="ten_dang_nhap"
+                                placeholder={t.login.usernamePlaceholder}
                                 prefix={
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -91,12 +93,12 @@ export const LoginPage: React.FC = () => {
 
                         <Form.Item
                             name="password"
-                            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}
+                            rules={[{ required: true, message: t.login.passwordRequired }]}
                             className={styles.formField}
                             label={
                                 <div className={styles.passwordHeader}>
-                                    <span className={styles.fieldLabel}>Mật khẩu</span>
-                                    <button type="button" className={styles.forgotButton}>Quên?</button>
+                                    <span className={styles.fieldLabel}>{t.login.passwordLabel}</span>
+                                    <button type="button" className={styles.forgotButton}>{t.login.forgotPassword}</button>
                                 </div>
                             }
                         >
@@ -118,7 +120,7 @@ export const LoginPage: React.FC = () => {
                                 loading={isPending}
                                 className={styles.submitButton}
                             >
-                                Đăng Nhập
+                                {t.login.loginBtn}
                             </Button>
                         </Form.Item>
                     </Form>

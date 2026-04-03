@@ -10,6 +10,7 @@ import {
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useEmployeeProfile, useLeaveBalance, useAnnouncements, useCreateLeaveRequest } from '../../shared/hooks/queries'
+import { useI18n } from '../../shared/context/i18n'
 import { formatDate } from '../../shared/utils/helpers'
 import type { LeaveRequestPayload } from '../../shared/types'
 import styles from './Dashboard.module.css'
@@ -72,6 +73,7 @@ const AnnouncementCard: React.FC<{ announcement: any; onClick: () => void }> = (
 /* ── Dashboard ──────────────────────────────────────────────────── */
 export const Dashboard: React.FC = () => {
     const navigate = useNavigate()
+    const t = useI18n()
     const [leaveModalOpen, setLeaveModalOpen] = useState(false)
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<any>(null)
     const [form] = Form.useForm()
@@ -89,12 +91,12 @@ export const Dashboard: React.FC = () => {
         }
         createLeave(data, {
             onSuccess: () => {
-                message.success('Gửi yêu cầu nghỉ phép thành công')
+                message.success(t.dashboard.leaveSuccess)
                 form.resetFields()
                 setLeaveModalOpen(false)
             },
             onError: (error: any) => {
-                message.error(error.response?.data?.message || 'Gửi yêu cầu thất bại')
+                message.error(error.response?.data?.message || t.dashboard.leaveSuccess)
             },
         })
     }
@@ -110,17 +112,17 @@ export const Dashboard: React.FC = () => {
         {/* ── Header ─────────────────────────────────────── */}
         <div className={styles.header}>
             <div className={styles.headerContent}>
-                <h1>Chào buổi sáng, {profile?.user?.first_name || profile?.first_name || 'bạn'} 👋</h1>
-                <p>Tổng quan những gì đang diễn ra hôm nay.</p>
+                <h1>{t.dashboard.greeting.replace('{name}', profile?.user?.first_name || profile?.first_name || '')}</h1>
+                <p>{t.dashboard.subtitle}</p>
             </div>
             <div className={styles.headerButtons}>
                 <button className={styles.btnSecondary} onClick={() => setLeaveModalOpen(true)}>
                     <CalendarOutlined />
-                    Đăng ký Nghỉ phép
+                    {t.dashboard.btnLeave}
                 </button>
                 <button className={styles.btnPrimary} onClick={() => navigate('/requests')}>
                     <PlusOutlined />
-                    Yêu cầu Mới
+                    {t.dashboard.btnNewRequest}
                 </button>
             </div>
         </div>
@@ -129,7 +131,7 @@ export const Dashboard: React.FC = () => {
         <Row gutter={[18, 18]} style={{ marginBottom: 36 }} className={styles.statsRow}>
             <Col xs={12} sm={12} md={6}>
                 <StatCard
-                    label="Phòng ban"
+                    label={t.dashboard.statDept}
                     value={profile?.department || 'N/A'}
                     icon={<TeamOutlined />}
                     color="#3B82F6"
@@ -141,8 +143,8 @@ export const Dashboard: React.FC = () => {
             </Col>
             <Col xs={12} sm={12} md={6}>
                 <StatCard
-                    label="Số ngày nghỉ còn lại"
-                    value={`${leaveBalance?.remaining ?? 0} ngày`}
+                    label={t.dashboard.statLeaveRemaining}
+                    value={`${leaveBalance?.remaining ?? 0} ${t.dashboard.daysLeft}`}
                     icon={<CheckCircleOutlined />}
                     color="#10B981"
                     bgLight="#ECFDF5"
@@ -153,7 +155,7 @@ export const Dashboard: React.FC = () => {
             </Col>
             <Col xs={12} sm={12} md={6}>
                 <StatCard
-                    label="Yêu cầu chờ duyệt"
+                    label={t.dashboard.statPending}
                     value={leaveBalance?.pending ?? 0}
                     icon={<ClockCircleOutlined />}
                     color="#8B5CF6"
@@ -165,7 +167,7 @@ export const Dashboard: React.FC = () => {
             </Col>
             <Col xs={12} sm={12} md={6}>
                 <StatCard
-                    label="Email"
+                    label={t.dashboard.statEmail}
                     value={profile?.user?.email?.split('@')[0] || profile?.email?.split('@')[0] || 'N/A'}
                     icon={<MailOutlined />}
                     color="#F59E0B"
@@ -182,7 +184,7 @@ export const Dashboard: React.FC = () => {
 
             {/* Leave balance */}
             <Col xs={24} md={16}>
-                <p className={styles.sectionTitle}>Số ngày nghỉ phép</p>
+                <p className={styles.sectionTitle}>{t.dashboard.sectionLeave}</p>
 
                 {leaveLoading ? (
                     <div style={{ padding: 40, textAlign: 'center' }}><Spin /></div>
@@ -202,7 +204,7 @@ export const Dashboard: React.FC = () => {
                                 letterSpacing: '0.07em',
                                 color: 'var(--brand-gray-500)',
                             }}>
-                                Nghỉ phép Năm
+                                {t.dashboard.annualLeaveLabel}
                             </span>
                             <span style={{
                                 fontSize: 22,
@@ -212,7 +214,7 @@ export const Dashboard: React.FC = () => {
                                 color: 'var(--brand-black)',
                             }}>
                                 {leaveBalance?.remaining ?? 0}
-                                <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--brand-gray-400)', marginLeft: 4 }}>ngày còn lại</span>
+                                <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--brand-gray-400)', marginLeft: 4 }}>{t.dashboard.daysLeft}</span>
                             </span>
                         </div>
 
@@ -226,8 +228,8 @@ export const Dashboard: React.FC = () => {
 
                         {/* Meta */}
                         <div className={styles.progressMeta}>
-                            <span>Đã dùng: <strong style={{ color: 'var(--brand-black)' }}>{leaveBalance?.used ?? 0}</strong> ngày</span>
-                            <span>Tổng: <strong style={{ color: 'var(--brand-black)' }}>{leaveBalance?.total ?? 0}</strong> ngày</span>
+                            <span>{t.dashboard.daysUsed} <strong style={{ color: 'var(--brand-black)' }}>{leaveBalance?.used ?? 0}</strong></span>
+                            <span>{t.dashboard.daysTotal} <strong style={{ color: 'var(--brand-black)' }}>{leaveBalance?.total ?? 0}</strong></span>
                         </div>
                     </div>
                 )}
@@ -235,7 +237,7 @@ export const Dashboard: React.FC = () => {
 
             {/* Announcements */}
             <Col xs={24} md={8}>
-                <p className={styles.sectionTitle}>Thông báo</p>
+                <p className={styles.sectionTitle}>{t.dashboard.sectionAnnounce}</p>
 
                 <div className={styles.announcementsScroll}>
                     {announcementsLoading ? (
@@ -245,7 +247,7 @@ export const Dashboard: React.FC = () => {
                             <AnnouncementCard key={a.id} announcement={a} onClick={() => setSelectedAnnouncement(a)} />
                         ))
                     ) : (
-                        <Empty description="Không có thông báo" />
+                        <Empty description={t.dashboard.noAnnouncements} />
                     )}
                 </div>
             </Col>
@@ -271,7 +273,7 @@ export const Dashboard: React.FC = () => {
 
         {/* ── Leave Request Modal ────────────────────────── */}
         <Modal
-            title="Đăng ký Nghỉ phép"
+            title={t.dashboard.leaveModalTitle}
             open={leaveModalOpen}
             onCancel={() => setLeaveModalOpen(false)}
             footer={null}
@@ -279,42 +281,42 @@ export const Dashboard: React.FC = () => {
         >
             <Form form={form} layout="vertical" onFinish={onLeaveSubmit}>
                 <Form.Item
-                    label="Loại nghỉ phép"
+                    label={t.dashboard.leaveTypeLabel}
                     name="leave_type"
-                    rules={[{ required: true, message: 'Vui lòng chọn loại nghỉ phép' }]}
+                    rules={[{ required: true, message: t.dashboard.leaveTypeRequired }]}
                 >
-                    <Select placeholder="Chọn loại nghỉ phép">
-                        <Select.Option value="sick">Nghỉ ốm</Select.Option>
-                        <Select.Option value="casual">Nghỉ việc riêng</Select.Option>
-                        <Select.Option value="earned">Nghỉ phép năm</Select.Option>
-                        <Select.Option value="maternity">Nghỉ thai sản</Select.Option>
-                        <Select.Option value="paternity">Nghỉ chăm con</Select.Option>
-                        <Select.Option value="unpaid">Nghỉ không lương</Select.Option>
+                    <Select placeholder={t.dashboard.leaveTypePlaceholder}>
+                        <Select.Option value="sick">{t.leaveTypes.sick}</Select.Option>
+                        <Select.Option value="casual">{t.leaveTypes.casual}</Select.Option>
+                        <Select.Option value="earned">{t.leaveTypes.earned}</Select.Option>
+                        <Select.Option value="maternity">{t.leaveTypes.maternity}</Select.Option>
+                        <Select.Option value="paternity">{t.leaveTypes.paternity}</Select.Option>
+                        <Select.Option value="unpaid">{t.leaveTypes.unpaid}</Select.Option>
                     </Select>
                 </Form.Item>
                 <Form.Item
-                    label="Ngày bắt đầu"
+                    label={t.dashboard.startDateLabel}
                     name="start_date"
-                    rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu' }]}
+                    rules={[{ required: true, message: t.dashboard.startDateRequired }]}
                 >
                     <DatePicker style={{ width: '100%' }} />
                 </Form.Item>
                 <Form.Item
-                    label="Ngày kết thúc"
+                    label={t.dashboard.endDateLabel}
                     name="end_date"
-                    rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc' }]}
+                    rules={[{ required: true, message: t.dashboard.endDateRequired }]}
                 >
                     <DatePicker style={{ width: '100%' }} />
                 </Form.Item>
                 <Form.Item
-                    label="Lý do"
+                    label={t.dashboard.reasonLabel}
                     name="reason"
-                    rules={[{ required: true, message: 'Vui lòng nhập lý do' }]}
+                    rules={[{ required: true, message: t.dashboard.reasonRequired }]}
                 >
-                    <Input.TextArea rows={4} placeholder="Nhập lý do xin nghỉ" />
+                    <Input.TextArea rows={4} placeholder={t.dashboard.reasonPlaceholder} />
                 </Form.Item>
                 <Button type="primary" htmlType="submit" block loading={leaveSubmitting}>
-                    Gửi Yêu cầu
+                    {t.dashboard.submitLeave}
                 </Button>
             </Form>
         </Modal>

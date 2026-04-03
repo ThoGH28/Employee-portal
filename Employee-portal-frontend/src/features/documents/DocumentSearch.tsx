@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Card, Input, Button, List, Empty, Space, Spin, Pagination } from 'antd'
 import { SearchOutlined, FileOutlined, DownloadOutlined } from '@ant-design/icons'
 import { searchService, documentService } from '../../shared/services/documentService'
+import { useI18n } from '../../shared/context/i18n'
 import { truncateText } from '../../shared/utils/helpers'
 import styles from './DocumentSearch.module.css'
 
@@ -14,6 +15,7 @@ interface SearchResult {
 }
 
 export const DocumentSearch: React.FC = () => {
+    const t = useI18n()
     const [query, setQuery] = useState('')
     const [results, setResults] = useState<SearchResult[]>([])
     const [isLoading, setIsLoading] = useState(false)
@@ -62,12 +64,12 @@ export const DocumentSearch: React.FC = () => {
 
     return (
         <div className={styles.searchContainer}>
-            <Card title="Tìm kiếm Tài liệu AI" className={styles.searchCard}>
+            <Card title={t.documents.cardTitle} className={styles.searchCard}>
                 {/* Search bar */}
                 <Space.Compact style={{ width: '100%', marginBottom: 28 }}>
                     <Input
                         size="large"
-                        placeholder="Tìm kiếm tài liệu, chính sách và thông báo..."
+                        placeholder={t.documents.placeholder}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onPressEnter={() => handleSearch()}
@@ -79,7 +81,7 @@ export const DocumentSearch: React.FC = () => {
                         onClick={() => handleSearch(query, 1)}
                         loading={isLoading}
                     >
-                        Tìm kiếm
+                        {t.documents.searchBtn}
                     </Button>
                 </Space.Compact>
 
@@ -93,7 +95,7 @@ export const DocumentSearch: React.FC = () => {
                     <>
                         {/* Result count */}
                         <p className={styles.resultCount}>
-                            {total} kết quả cho "{query}"
+                            {t.documents.resultCount.replace('{n}', String(total)).replace('{q}', query)}
                         </p>
 
                         <List
@@ -114,7 +116,7 @@ export const DocumentSearch: React.FC = () => {
                                                 </p>
                                                 <div className={styles.resultMeta}>
                                                     <span className={styles.relevanceTag}>
-                                                        {(result.relevance_score * 100).toFixed(0)}% phù hợp
+                                                        {t.documents.relevance.replace('{n}', (result.relevance_score * 100).toFixed(0))}
                                                     </span>
                                                     <Button
                                                         type="link"
@@ -122,7 +124,7 @@ export const DocumentSearch: React.FC = () => {
                                                         icon={<DownloadOutlined />}
                                                         onClick={() => handleDownload(result.document_id)}
                                                     >
-                                                        Tải xuống
+                                                        {t.documents.downloadBtn}
                                                     </Button>
                                                 </div>
                                             </div>
@@ -146,7 +148,7 @@ export const DocumentSearch: React.FC = () => {
                 )}
 
                 {query && results.length === 0 && !isLoading && (
-                    <Empty description="Không tìm thấy tài liệu" />
+                    <Empty description={t.documents.noResults} />
                 )}
             </Card>
         </div>

@@ -89,3 +89,38 @@ class RefreshTokenLog(models.Model):
     
     def __str__(self):
         return f"Token log for {self.user} at {self.created_at}"
+
+
+class LoginLog(models.Model):
+    """
+    Audit log for every login attempt (success or failed)
+    """
+    STATUS_CHOICES = (
+        ('success', 'Success'),
+        ('failed', 'Failed'),
+    )
+
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='login_logs',
+    )
+    username_attempted = models.CharField(max_length=150, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='success')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['ip_address']),
+            models.Index(fields=['status']),
+        ]
+
+    def __str__(self):
+        identifier = self.user.username if self.user else self.username_attempted
+        return f"LoginLog({self.status}) {identifier} @ {self.created_at}"
