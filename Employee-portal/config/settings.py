@@ -54,6 +54,13 @@ INSTALLED_APPS = [
     'apps.chat',
     'apps.search',
     'apps.automation',
+    'apps.attendance',
+    'apps.performance',
+    'apps.training',
+    'apps.assets',
+    'apps.expenses',
+    'apps.notifications',
+    'apps.surveys',
 ]
 
 MIDDLEWARE = [

@@ -11,7 +11,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 import logging
 
-from apps.employees.models import EmployeeProfile, LeaveRequest, HRAnnouncement, Payslip, AdministrativeRequest
+from apps.employees.models import EmployeeProfile, LeaveRequest, HRAnnouncement, Payslip, AdministrativeRequest, WFHRequest, Contract, PublicHoliday
 from apps.employees.serializers import (
     EmployeeProfileSerializer,
     EmployeeProfileBasicSerializer,
@@ -24,7 +24,11 @@ from apps.employees.serializers import (
     PayslipCreateUpdateSerializer,
     OrgChartNodeSerializer,
     AdministrativeRequestSerializer,
-    AdministrativeRequestProcessSerializer
+    AdministrativeRequestProcessSerializer,
+    WFHRequestSerializer,
+    WFHApprovalSerializer,
+    ContractSerializer,
+    PublicHolidaySerializer,
 )
 from apps.users.permissions import get_department_filter
 
@@ -543,3 +547,91 @@ class AdministrativeRequestViewSet(viewsets.ModelViewSet):
         admin_request.status = 'pending'
         admin_request.save()
         return Response(AdministrativeRequestSerializer(admin_request).data)
+
+
+class WFHRequestViewSet(viewsets.ModelViewSet):
+    queryset = WFHRequest.objects.select_related('employee', 'approved_by')
+    serializer_class = WFHRequestSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['status', 'employee']
+    ordering_fields = ['start_date', 'created_at']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role in ['admin', 'hr']:
+            return WFHRequest.objects.select_related('employee', 'approved_by').all()
+        if user.is_department_manager():
+            dept = user.get_department()
+            return WFHRequest.objects.select_related('employee', 'approved_by').filter(
+                employee__profile__department=dept
+            )
+        return WFHRequest.objects.filter(employee=user)
+
+    def perform_create(self, serializer):
+        serializer.save(employee=self.request.user)
+
+    @action(detail=True, methods=['post'], url_path='approve')
+    def approve(self, request, pk=None):
+        user = request.user
+        if not (user.role in ['admin', 'hr'] or user.is_department_manager()):
+            return Response({'detail': 'Không có quyền.'}, status=status.HTTP_403_FORBIDDEN)
+        wfh = self.get_object()
+        if wfh.status != 'pending':
+            return Response({'detail': 'Chỉ duyệt được đơn đang chờ.'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = WFHApprovalSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        wfh.status = serializer.validated_data['status']
+        wfh.approval_comment = serializer.validated_data.get('approval_comment', '')
+        wfh.approved_by = user
+        wfh.approved_at = timezone.now()
+        wfh.save()
+        return Response(WFHRequestSerializer(wfh).data)
+
+    @action(detail=True, methods=['post'], url_path='cancel')
+    def cancel(self, request, pk=None):
+        wfh = self.get_object()
+        if wfh.employee != request.user:
+            return Response({'detail': 'Không có quyền.'}, status=status.HTTP_403_FORBIDDEN)
+        if wfh.status not in ['pending']:
+            return Response({'detail': 'Chỉ có thể hủy đơn đang chờ.'}, status=status.HTTP_400_BAD_REQUEST)
+        wfh.status = 'cancelled'
+        wfh.save()
+        return Response(WFHRequestSerializer(wfh).data)
+
+
+class ContractViewSet(viewsets.ModelViewSet):
+    queryset = Contract.objects.select_related('employee', 'created_by')
+    serializer_class = ContractSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['status', 'contract_type', 'employee']
+    search_fields = ['contract_number']
+    ordering_fields = ['start_date', 'end_date', 'created_at']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role in ['admin', 'hr']:
+            return Contract.objects.select_related('employee', 'created_by').all()
+        return Contract.objects.filter(employee=user)
+
+    def perform_create(self, serializer):
+        if self.request.user.role not in ['admin', 'hr']:
+            from rest_framework import exceptions
+            raise exceptions.PermissionDenied('Chỉ Admin/HR mới có thể tạo hợp đồng.')
+        serializer.save(created_by=self.request.user)
+
+
+class PublicHolidayViewSet(viewsets.ModelViewSet):
+    queryset = PublicHoliday.objects.all()
+    serializer_class = PublicHolidaySerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['is_paid']
+    ordering_fields = ['date']
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            from apps.users.permissions import IsAdminOrHR
+            return [IsAdminOrHR()]
+        return [IsAuthenticated()]

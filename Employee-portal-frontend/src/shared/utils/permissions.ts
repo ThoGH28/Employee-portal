@@ -96,6 +96,14 @@ export interface SidebarVisibility {
   reports: boolean;
   leaveApproval: boolean;
   help: boolean;
+  attendance: boolean;
+  performance: boolean;
+  training: boolean;
+  assets: boolean;
+  expenses: boolean;
+  workforce: boolean;
+  notifications: boolean;
+  surveys: boolean;
 }
 
 export const getSidebarVisibility = (user: User | null): SidebarVisibility => {
@@ -111,6 +119,14 @@ export const getSidebarVisibility = (user: User | null): SidebarVisibility => {
       reports: false,
       leaveApproval: false,
       help: false,
+      attendance: false,
+      performance: false,
+      training: false,
+      assets: false,
+      expenses: false,
+      workforce: false,
+      notifications: false,
+      surveys: false,
     };
   }
 
@@ -125,6 +141,14 @@ export const getSidebarVisibility = (user: User | null): SidebarVisibility => {
     reports: false,
     leaveApproval: false,
     help: true,
+    attendance: true,
+    performance: true,
+    training: true,
+    assets: true,
+    expenses: true,
+    workforce: true,
+    notifications: true,
+    surveys: true,
   };
 
   if (user.role === "admin") {

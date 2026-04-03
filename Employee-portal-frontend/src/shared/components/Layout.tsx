@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from 'react'
 import { Layout, Menu, Dropdown, Avatar, Button, Space } from 'antd'
-import { LogoutOutlined, UserOutlined, SettingOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DollarOutlined, FileTextOutlined, TeamOutlined, ApartmentOutlined, FileProtectOutlined, SolutionOutlined, DashboardOutlined, BarChartOutlined, QuestionCircleOutlined, CalendarOutlined } from '@ant-design/icons'
+import { LogoutOutlined, UserOutlined, SettingOutlined, MenuFoldOutlined, MenuUnfoldOutlined, DollarOutlined, FileTextOutlined, TeamOutlined, ApartmentOutlined, FileProtectOutlined, SolutionOutlined, DashboardOutlined, BarChartOutlined, QuestionCircleOutlined, CalendarOutlined, ClockCircleOutlined, TrophyOutlined, ReadOutlined, LaptopOutlined, WalletOutlined, HomeOutlined, BellOutlined, FormOutlined, AppstoreOutlined } from '@ant-design/icons'
 import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../context/store'
 import { useI18n } from '../context/i18n'
@@ -16,19 +16,14 @@ interface AppLayoutProps {
     children: React.ReactNode
 }
 
-const sidebarKeys = [
-    { key: 'dashboard', icon: <DashboardOutlined />, visKey: 'dashboard' as const },
-    { key: 'profile', icon: <SolutionOutlined />, visKey: 'profile' as const },
-    { key: 'payslips', icon: <DollarOutlined />, visKey: 'payslips' as const },
-    { key: 'leave', icon: <CalendarOutlined />, visKey: 'dashboard' as const },
-    { key: 'requests', icon: <FileProtectOutlined />, visKey: 'requests' as const },
-    { key: 'leave-approval', icon: <CalendarOutlined />, visKey: 'leaveApproval' as const },
-    { key: 'org-chart', icon: <ApartmentOutlined />, visKey: 'orgChart' as const },
-    { key: 'documents', icon: <FileTextOutlined />, visKey: 'documents' as const },
-    { key: 'reports', icon: <BarChartOutlined />, visKey: 'reports' as const },
-    { key: 'admin', icon: <TeamOutlined />, visKey: 'admin' as const },
-    { key: 'help', icon: <QuestionCircleOutlined />, visKey: 'help' as const },
-] as const
+const routeToGroupKey: Record<string, string> = {
+    leave: 'grp-time', attendance: 'grp-time', requests: 'grp-time', 'leave-approval': 'grp-time',
+    payslips: 'grp-finance', expenses: 'grp-finance',
+    performance: 'grp-dev', training: 'grp-dev',
+    'org-chart': 'grp-org', workforce: 'grp-org', documents: 'grp-org', assets: 'grp-org',
+    notifications: 'grp-comms', surveys: 'grp-comms',
+    reports: 'grp-mgmt', admin: 'grp-mgmt',
+}
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     const navigate = useNavigate()
@@ -38,6 +33,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     const t = useI18n()
     const [collapsed, setCollapsed] = React.useState(false)
     const [isMobile, setIsMobile] = useState(false)
+    const [openKeys, setOpenKeys] = useState<string[]>(() => {
+        const key = location.pathname.replace('/', '') || 'dashboard'
+        const g = routeToGroupKey[key]
+        return g ? [g] : []
+    })
 
     useEffect(() => {
         const mq = window.matchMedia('(max-width: 768px)')
@@ -53,6 +53,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
     const currentKey = location.pathname.replace('/', '') || 'dashboard'
 
+    useEffect(() => {
+        const group = routeToGroupKey[currentKey]
+        if (group) setOpenKeys(prev => prev.includes(group) ? prev : [...prev, group])
+    }, [currentKey])
+
     const navLabels: Record<string, string> = {
         dashboard: t.layout.nav.dashboard,
         profile: t.layout.nav.profile,
@@ -65,13 +70,65 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         reports: t.layout.nav.reports,
         admin: t.layout.nav.admin,
         help: t.layout.nav.help,
+        attendance: t.layout.nav.attendance,
+        performance: t.layout.nav.performance,
+        training: t.layout.nav.training,
+        assets: t.layout.nav.assets,
+        expenses: t.layout.nav.expenses,
+        workforce: t.layout.nav.workforce,
+        notifications: t.layout.nav.notifications,
+        surveys: t.layout.nav.surveys,
     }
 
     const sidebarItems = useMemo(() => {
-        const visibility = getSidebarVisibility(user)
-        return sidebarKeys
-            .filter((item) => visibility[item.visKey])
-            .map(({ visKey: _v, key, icon }) => ({ key, icon, label: navLabels[key] ?? key }))
+        const v = getSidebarVisibility(user)
+        const l = (key: string) => navLabels[key] ?? key
+
+        const timeLeaveChildren = [
+            { key: 'leave', icon: <CalendarOutlined />, label: l('leave') },
+            v.attendance && { key: 'attendance', icon: <ClockCircleOutlined />, label: l('attendance') },
+            v.requests && { key: 'requests', icon: <FileProtectOutlined />, label: l('requests') },
+            v.leaveApproval && { key: 'leave-approval', icon: <CalendarOutlined />, label: l('leave-approval') },
+        ].filter(Boolean)
+
+        const financeChildren = [
+            v.payslips && { key: 'payslips', icon: <DollarOutlined />, label: l('payslips') },
+            v.expenses && { key: 'expenses', icon: <WalletOutlined />, label: l('expenses') },
+        ].filter(Boolean)
+
+        const devChildren = [
+            v.performance && { key: 'performance', icon: <TrophyOutlined />, label: l('performance') },
+            v.training && { key: 'training', icon: <ReadOutlined />, label: l('training') },
+        ].filter(Boolean)
+
+        const orgChildren = [
+            v.orgChart && { key: 'org-chart', icon: <ApartmentOutlined />, label: l('org-chart') },
+            v.workforce && { key: 'workforce', icon: <HomeOutlined />, label: l('workforce') },
+            v.documents && { key: 'documents', icon: <FileTextOutlined />, label: l('documents') },
+            v.assets && { key: 'assets', icon: <LaptopOutlined />, label: l('assets') },
+        ].filter(Boolean)
+
+        const commsChildren = [
+            v.notifications && { key: 'notifications', icon: <BellOutlined />, label: l('notifications') },
+            v.surveys && { key: 'surveys', icon: <FormOutlined />, label: l('surveys') },
+        ].filter(Boolean)
+
+        const mgmtChildren = [
+            v.reports && { key: 'reports', icon: <BarChartOutlined />, label: l('reports') },
+            v.admin && { key: 'admin', icon: <TeamOutlined />, label: l('admin') },
+        ].filter(Boolean)
+
+        return [
+            { key: 'dashboard', icon: <DashboardOutlined />, label: l('dashboard') },
+            v.profile && { key: 'profile', icon: <SolutionOutlined />, label: l('profile') },
+            timeLeaveChildren.length > 0 && { key: 'grp-time', icon: <CalendarOutlined />, label: t.layout.nav.groupTimeLeave, children: timeLeaveChildren },
+            financeChildren.length > 0 && { key: 'grp-finance', icon: <WalletOutlined />, label: t.layout.nav.groupFinance, children: financeChildren },
+            devChildren.length > 0 && { key: 'grp-dev', icon: <TrophyOutlined />, label: t.layout.nav.groupDevelopment, children: devChildren },
+            orgChildren.length > 0 && { key: 'grp-org', icon: <AppstoreOutlined />, label: t.layout.nav.groupOrganization, children: orgChildren },
+            commsChildren.length > 0 && { key: 'grp-comms', icon: <BellOutlined />, label: t.layout.nav.groupComms, children: commsChildren },
+            mgmtChildren.length > 0 && { key: 'grp-mgmt', icon: <BarChartOutlined />, label: t.layout.nav.groupAdminReports, children: mgmtChildren },
+            v.help && { key: 'help', icon: <QuestionCircleOutlined />, label: l('help') },
+        ].filter(Boolean)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, t])
 
@@ -143,6 +200,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                     theme="dark"
                     mode="inline"
                     selectedKeys={[currentKey]}
+                    openKeys={collapsed ? [] : openKeys}
+                    onOpenChange={(keys) => { if (!collapsed) setOpenKeys(keys) }}
                     items={sidebarItems}
                     onClick={handleMenuClick}
                     className={styles.sideMenu}

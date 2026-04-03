@@ -5,7 +5,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from django.db import transaction
 from django.contrib.auth.password_validation import validate_password
-from apps.employees.models import EmployeeProfile, LeaveRequest, HRAnnouncement, Payslip, AdministrativeRequest
+from apps.employees.models import EmployeeProfile, LeaveRequest, HRAnnouncement, Payslip, AdministrativeRequest, WFHRequest, Contract, PublicHoliday
 from apps.users.models import CustomUser
 from apps.users.serializers import UserSerializer
 
@@ -314,3 +314,51 @@ class AdministrativeRequestProcessSerializer(serializers.ModelSerializer):
         if value not in ['in_progress', 'approved', 'rejected', 'completed']:
             raise serializers.ValidationError("Invalid status transition")
         return value
+
+
+class WFHRequestSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source='employee.get_full_name', read_only=True)
+    approved_by_name = serializers.CharField(source='approved_by.get_full_name', read_only=True, default='')
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = WFHRequest
+        fields = [
+            'id', 'employee', 'employee_name',
+            'start_date', 'end_date', 'reason',
+            'status', 'status_display',
+            'approved_by', 'approved_by_name', 'approval_comment', 'approved_at',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'approved_by', 'approved_at', 'created_at', 'updated_at']
+
+
+class WFHApprovalSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=['approved', 'rejected'])
+    approval_comment = serializers.CharField(required=False, allow_blank=True)
+
+
+class ContractSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source='employee.get_full_name', read_only=True)
+    contract_type_display = serializers.CharField(source='get_contract_type_display', read_only=True)
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+
+    class Meta:
+        model = Contract
+        fields = [
+            'id', 'employee', 'employee_name',
+            'contract_type', 'contract_type_display',
+            'contract_number', 'start_date', 'end_date',
+            'basic_salary', 'status', 'status_display',
+            'contract_file', 'notes', 'created_by',
+            'created_at', 'updated_at',
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class PublicHolidaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PublicHoliday
+        fields = ['id', 'name', 'date', 'description', 'is_paid', 'created_at']
+        read_only_fields = ['id', 'created_at']
+

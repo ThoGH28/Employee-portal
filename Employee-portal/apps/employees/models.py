@@ -278,3 +278,92 @@ class AdministrativeRequest(models.Model):
 
     def __str__(self):
         return f"{self.employee.username} - {self.get_request_type_display()} ({self.status})"
+
+
+class WFHRequest(models.Model):
+    """Work-from-home requests"""
+    STATUS_CHOICES = (
+        ('pending', 'Chờ duyệt'),
+        ('approved', 'Đã duyệt'),
+        ('rejected', 'Từ chối'),
+        ('cancelled', 'Đã hủy'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='wfh_requests')
+    start_date = models.DateField()
+    end_date = models.DateField()
+    reason = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    approved_by = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='approved_wfh'
+    )
+    approval_comment = models.TextField(blank=True)
+    approved_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['employee', 'status'])]
+
+    def __str__(self):
+        return f"{self.employee.username} WFH {self.start_date} -> {self.end_date}"
+
+
+class Contract(models.Model):
+    """Employee labor contracts"""
+    CONTRACT_TYPE_CHOICES = (
+        ('probation', 'Thử việc'),
+        ('fixed_term', 'Có thời hạn'),
+        ('indefinite', 'Vô thời hạn'),
+        ('part_time', 'Bán thời gian'),
+        ('freelance', 'Cộng tác viên'),
+    )
+    STATUS_CHOICES = (
+        ('active', 'Đang hiệu lực'),
+        ('expired', 'Hết hạn'),
+        ('terminated', 'Đã chấm dứt'),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    employee = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='contracts')
+    contract_type = models.CharField(max_length=30, choices=CONTRACT_TYPE_CHOICES)
+    contract_number = models.CharField(max_length=100, blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField(blank=True, null=True)
+    basic_salary = models.DecimalField(max_digits=14, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    contract_file = models.FileField(upload_to='contracts/', blank=True, null=True)
+    notes = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='created_contracts'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-start_date']
+        indexes = [models.Index(fields=['employee', 'status'])]
+
+    def __str__(self):
+        return f"{self.employee.username} - {self.get_contract_type_display()} ({self.start_date})"
+
+
+class PublicHoliday(models.Model):
+    """Company public holidays / special days"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    date = models.DateField(unique=True)
+    description = models.TextField(blank=True)
+    is_paid = models.BooleanField(default=True, help_text="Có lương trong ngày nghỉ lễ này không")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['date']
+        indexes = [models.Index(fields=['date'])]
+
+    def __str__(self):
+        return f"{self.name} ({self.date})"

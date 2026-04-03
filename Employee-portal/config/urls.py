@@ -18,6 +18,13 @@ urlpatterns = [
     path('api/chat/', include('apps.chat.urls')),
     path('api/search/', include('apps.search.urls')),
     path('api/automation/', include('apps.automation.urls')),
+    path('api/attendance/', include('apps.attendance.urls')),
+    path('api/performance/', include('apps.performance.urls')),
+    path('api/training/', include('apps.training.urls')),
+    path('api/assets/', include('apps.assets.urls')),
+    path('api/expenses/', include('apps.expenses.urls')),
+    path('api/notifications/', include('apps.notifications.urls')),
+    path('api/surveys/', include('apps.surveys.urls')),
 ]
 
 if settings.DEBUG:

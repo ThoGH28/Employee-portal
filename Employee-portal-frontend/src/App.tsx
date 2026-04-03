@@ -21,6 +21,14 @@ import { AdminRequests } from './features/requests/AdminRequests'
 import { OrgChart } from './features/orgchart/OrgChart'
 import { Reports } from './features/reports/Reports'
 import { UserManual } from './features/help/UserManual'
+import { Attendance } from './features/attendance/Attendance'
+import { Performance } from './features/performance/Performance'
+import { Training } from './features/training/Training'
+import { Assets } from './features/assets/Assets'
+import { Expenses } from './features/expenses/Expenses'
+import { Workforce } from './features/workforce/Workforce'
+import { Notifications } from './features/notifications/Notifications'
+import { Surveys } from './features/surveys/Surveys'
 import { queryClient } from './config/queryClient'
 import antdTheme from './shared/styles/theme'
 
@@ -83,6 +91,14 @@ export const App: React.FC = () => {
                             />
                             <Route path="/settings" element={<Settings />} />
                             <Route path="/help" element={<UserManual />} />
+                            <Route path="/attendance" element={<Attendance />} />
+                            <Route path="/performance" element={<Performance />} />
+                            <Route path="/training" element={<Training />} />
+                            <Route path="/assets" element={<Assets />} />
+                            <Route path="/expenses" element={<Expenses />} />
+                            <Route path="/workforce" element={<Workforce />} />
+                            <Route path="/notifications" element={<Notifications />} />
+                            <Route path="/surveys" element={<Surveys />} />
                             <Route
                                 path="/admin"
                                 element={
