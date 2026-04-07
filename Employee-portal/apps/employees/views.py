@@ -412,6 +412,202 @@ class PayslipViewSet(viewsets.ModelViewSet):
             status=status.HTTP_404_NOT_FOUND
         )
 
+    @action(detail=True, methods=['get'], url_path='generate-pdf')
+    def generate_pdf(self, request, pk=None):
+        """Generate and return a PDF payslip on the fly using reportlab."""
+        payslip = self.get_object()
+
+        if payslip.employee != request.user and request.user.role not in ['admin', 'hr']:
+            return Response(
+                {'detail': 'Không có quyền xem phiếu lương này.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        import io, os
+        from django.http import HttpResponse
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib import colors
+        from reportlab.lib.units import cm
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.enums import TA_CENTER, TA_RIGHT
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+
+        # ── Register a Unicode/Vietnamese-capable font ──────────────────
+        # Try common system font locations (Windows → Linux/Docker)
+        _font_candidates = [
+            (r'C:\Windows\Fonts\arial.ttf',    r'C:\Windows\Fonts\arialbd.ttf'),
+            (r'C:\Windows\Fonts\calibri.ttf',  r'C:\Windows\Fonts\calibrib.ttf'),
+            ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+             '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'),
+            ('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+             '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'),
+            ('/usr/share/fonts/truetype/freefont/FreeSans.ttf',
+             '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf'),
+        ]
+        FONT_REG  = 'VietFont'
+        FONT_BOLD = 'VietFont-Bold'
+        _registered = FONT_REG in pdfmetrics.getRegisteredFontNames()
+        if not _registered:
+            for reg_path, bold_path in _font_candidates:
+                if os.path.exists(reg_path) and os.path.exists(bold_path):
+                    pdfmetrics.registerFont(TTFont(FONT_REG,  reg_path))
+                    pdfmetrics.registerFont(TTFont(FONT_BOLD, bold_path))
+                    _registered = True
+                    break
+        if not _registered:
+            # Last-resort: use reportlab's built-in CID font for basic Latin
+            FONT_REG = FONT_BOLD = 'Helvetica'
+
+        # ── Helpers ─────────────────────────────────────────────────────
+        fmt_vnd = lambda v: f"{int(v):,} VND".replace(',', '.')
+
+        def P(text, style):
+            """Shorthand – return a Paragraph, escaping & for XML safety."""
+            return Paragraph(str(text).replace('&', '&amp;'), style)
+
+        emp = payslip.employee
+        profile = getattr(emp, 'profile', None)
+        dept = getattr(profile, 'department', '—') if profile else '—'
+        pos  = getattr(profile, 'position', '—') if profile else '—'
+        month_label = payslip.month_year.strftime('%m/%Y')
+
+        # ── Document & base styles ───────────────────────────────────────
+        buf = io.BytesIO()
+        doc = SimpleDocTemplate(
+            buf, pagesize=A4,
+            leftMargin=2*cm, rightMargin=2*cm, topMargin=2*cm, bottomMargin=2*cm
+        )
+        base = getSampleStyleSheet()
+
+        def style(name, **kw):
+            kw.setdefault('fontName', FONT_REG)
+            kw.setdefault('fontSize', 10)
+            return ParagraphStyle(name, parent=base['Normal'], **kw)
+
+        s_title   = style('ps_title',   fontName=FONT_BOLD, fontSize=18, alignment=TA_CENTER, spaceAfter=4)
+        s_sub     = style('ps_sub',     fontSize=10, alignment=TA_CENTER, spaceAfter=2)
+        s_label   = style('ps_label',   fontName=FONT_BOLD, fontSize=9,  textColor=colors.HexColor('#555555'))
+        s_value   = style('ps_value',   fontSize=9)
+        s_section = style('ps_section', fontName=FONT_BOLD, fontSize=11,
+                          textColor=colors.HexColor('#1a3c5e'), spaceBefore=10, spaceAfter=4)
+        s_row     = style('ps_row',     fontSize=9)
+        s_row_r   = style('ps_row_r',   fontSize=9, alignment=TA_RIGHT)
+        s_total   = style('ps_total',   fontName=FONT_BOLD, fontSize=9)
+        s_total_r = style('ps_total_r', fontName=FONT_BOLD, fontSize=9, alignment=TA_RIGHT)
+        s_net_l   = style('ps_net_l',   fontName=FONT_BOLD, fontSize=13,
+                          textColor=colors.white)
+        s_net_r   = style('ps_net_r',   fontName=FONT_BOLD, fontSize=13,
+                          textColor=colors.white, alignment=TA_RIGHT)
+        s_footer  = style('ps_footer',  fontSize=8, textColor=colors.gray, alignment=TA_CENTER)
+
+        elements = []
+
+        # ── Header ──────────────────────────────────────────────────────
+        elements.append(P("PHIẾU LƯƠNG", s_title))
+        elements.append(P(f"Tháng {month_label}", s_sub))
+        elements.append(Spacer(1, 0.3*cm))
+        elements.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#1a3c5e')))
+        elements.append(Spacer(1, 0.4*cm))
+
+        # ── Employee info ────────────────────────────────────────────────
+        info_data = [
+            [P("Họ và tên:",        s_label), P(emp.get_full_name() or emp.username, s_value),
+             P("Mã NV:",            s_label), P(getattr(profile, 'employee_id', '—') if profile else '—', s_value)],
+            [P("Phòng ban:",        s_label), P(dept, s_value),
+             P("Chức vụ:",          s_label), P(pos,  s_value)],
+            [P("Email:",            s_label), P(emp.email, s_value),
+             P("Trạng thái phiếu:", s_label), P(payslip.get_status_display(), s_value)],
+        ]
+        info_table = Table(info_data, colWidths=[3*cm, 7*cm, 3.2*cm, 3.8*cm])
+        info_table.setStyle(TableStyle([
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+            ('TOPPADDING',    (0,0), (-1,-1), 4),
+            ('VALIGN',        (0,0), (-1,-1), 'TOP'),
+        ]))
+        elements.append(info_table)
+        elements.append(Spacer(1, 0.5*cm))
+        elements.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#dddddd')))
+
+        # ── Earnings & Deductions ────────────────────────────────────────
+        elements.append(Spacer(1, 0.4*cm))
+
+        earn_data = [
+            [P("THU NHẬP", s_section), ""],
+            [P("Lương cơ bản:",          s_row), P(fmt_vnd(payslip.basic_salary),          s_row_r)],
+            [P("Phụ cấp nhà ở (HRA):",   s_row), P(fmt_vnd(payslip.house_rent_allowance),   s_row_r)],
+            [P("Phụ cấp đắt đỏ (DA):",   s_row), P(fmt_vnd(payslip.dearness_allowance),     s_row_r)],
+            [P("Phụ cấp khác:",           s_row), P(fmt_vnd(payslip.other_allowances),       s_row_r)],
+            [P("Tổng thu nhập",          s_total), P(fmt_vnd(payslip.gross_salary),          s_total_r)],
+        ]
+        ded_data = [
+            [P("KHẤU TRỪ", s_section), ""],
+            [P("Quỹ hưu trí (PF):",      s_row), P(fmt_vnd(payslip.provident_fund),         s_row_r)],
+            [P("Thuế TNCN:",             s_row), P(fmt_vnd(payslip.tax_deducted_at_source),  s_row_r)],
+            [P("Bảo hiểm:",              s_row), P(fmt_vnd(payslip.insurance),               s_row_r)],
+            [P("Khấu trừ khác:",         s_row), P(fmt_vnd(payslip.other_deductions),        s_row_r)],
+            [P("Tổng khấu trừ",         s_total), P(fmt_vnd(payslip.total_deductions),       s_total_r)],
+        ]
+
+        def make_section_table(data):
+            t = Table(data, colWidths=[5.5*cm, 3.5*cm])
+            t.setStyle(TableStyle([
+                ('FONTSIZE',      (0,0), (-1,-1), 9),
+                ('ALIGN',         (1,0), (1,-1), 'RIGHT'),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+                ('TOPPADDING',    (0,0), (-1,-1), 4),
+                ('LINEBELOW',     (0,-1), (-1,-1), 0.8, colors.HexColor('#1a3c5e')),
+                ('BACKGROUND',    (0,-1), (-1,-1), colors.HexColor('#f0f4f8')),
+                ('SPAN',          (0,0), (1,0)),
+                ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
+            ]))
+            return t
+
+        two_col = Table(
+            [[make_section_table(earn_data), make_section_table(ded_data)]],
+            colWidths=[9.5*cm, 9.5*cm]
+        )
+        two_col.setStyle(TableStyle([
+            ('VALIGN',       (0,0), (-1,-1), 'TOP'),
+            ('LEFTPADDING',  (1,0), (1,0), 12),
+        ]))
+        elements.append(two_col)
+
+        # ── Net salary hero ──────────────────────────────────────────────
+        elements.append(Spacer(1, 0.6*cm))
+        net_table = Table(
+            [[P("LƯƠNG THỰC NHẬN", s_net_l), P(fmt_vnd(payslip.net_salary), s_net_r)]],
+            colWidths=[13*cm, 6*cm]
+        )
+        net_table.setStyle(TableStyle([
+            ('BACKGROUND',    (0,0), (-1,-1), colors.HexColor('#1a3c5e')),
+            ('TOPPADDING',    (0,0), (-1,-1), 10),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+            ('LEFTPADDING',   (0,0), (0,-1), 14),
+            ('RIGHTPADDING',  (1,0), (1,-1), 14),
+            ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
+        ]))
+        elements.append(net_table)
+
+        # ── Footer ───────────────────────────────────────────────────────
+        elements.append(Spacer(1, 1*cm))
+        elements.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#dddddd')))
+        elements.append(Spacer(1, 0.3*cm))
+        elements.append(P(
+            f"Phiếu lương được tạo tự động • {month_label} • Confidential",
+            s_footer
+        ))
+
+        doc.build(elements)
+        buf.seek(0)
+
+        filename = f"Phieu_luong_{emp.username}_{month_label.replace('/', '_')}.pdf"
+        response = HttpResponse(buf, content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="{filename}"'
+        response['Access-Control-Expose-Headers'] = 'Content-Disposition'
+        return response
+
 
 class OrgChartViewSet(viewsets.ViewSet):
     """

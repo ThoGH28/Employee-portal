@@ -101,6 +101,13 @@ export const payslipService = {
   },
 
   /**
+   * Get the relative API path for the server-generated PDF payslip.
+   * Pass this to api.get() — do NOT concatenate with baseURL again.
+   */
+  getGeneratePdfPath: (id: string): string =>
+    `/employees/payslips/${id}/generate-pdf/`,
+
+  /**
    * Filter payslips by status and month
    */
   filterPayslips: async (

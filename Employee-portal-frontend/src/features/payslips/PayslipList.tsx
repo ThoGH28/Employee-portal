@@ -1,18 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Table, Modal, Spin, message } from 'antd';
 import {
     DownloadOutlined,
     FileTextOutlined,
-    EyeOutlined,
     DotChartOutlined,
     CheckCircleFilled,
     ClockCircleFilled,
+    FilePdfOutlined,
 } from '@ant-design/icons';
 import styles from './Payslips.module.css';
 import { payslipService } from '../../shared/services/payslipService';
 import type { Payslip } from '../../shared/types/payslip';
 import { useI18n } from '../../shared/context/i18n';
+import api from '../../shared/services/api';
 
 
 /* ── Helpers ────────────────────────────────────────────────────── */
@@ -34,96 +35,21 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
     );
 };
 
-/* ── Payslip Detail ──────────────────────────────────────────────── */
-const PayslipDetails: React.FC<{ payslip: Payslip }> = ({ payslip }) => {
-    const t = useI18n();
-    return (
-    <div className={styles.payslipDetails}>
-        {/* Month + Status */}
-        <div className={styles.detailHeader}>
-            <h2>{payslip.month_year_display}</h2>
-            <StatusBadge status={payslip.status} />
-        </div>
-
-        {/* Earnings & Deductions */}
-        <div className={styles.detailsGrid}>
-            {/* Earnings */}
-            <div className={styles.section}>
-                <p className={`${styles.sectionLabel} ${styles.earningsLabel}`}>{t.payslips.earnings}</p>
-                <div className={styles.detailRow}>
-                    <span>{t.payslips.basic}</span>
-                    <span>{fmt(payslip.basic_salary)}</span>
-                </div>
-                <div className={styles.detailRow}>
-                    <span>{t.payslips.hra}</span>
-                    <span>{fmt(payslip.house_rent_allowance)}</span>
-                </div>
-                <div className={styles.detailRow}>
-                    <span>{t.payslips.da}</span>
-                    <span>{fmt(payslip.dearness_allowance)}</span>
-                </div>
-                {payslip.other_allowances > 0 && (
-                    <div className={styles.detailRow}>
-                        <span>{t.payslips.otherAllowances}</span>
-                        <span>{fmt(payslip.other_allowances)}</span>
-                    </div>
-                )}
-                <div className={styles.detailRowTotal}>
-                    <span>{t.payslips.grossSalary}</span>
-                    <span>{fmt(payslip.gross_salary)}</span>
-                </div>
-            </div>
-
-            {/* Deductions */}
-            <div className={styles.section}>
-                <p className={`${styles.sectionLabel} ${styles.deductionsLabel}`}>{t.payslips.deductions}</p>
-                <div className={styles.detailRow}>
-                    <span>{t.payslips.pf}</span>
-                    <span>{fmt(payslip.provident_fund)}</span>
-                </div>
-                <div className={styles.detailRow}>
-                    <span>{t.payslips.tax}</span>
-                    <span>{fmt(payslip.tax_deducted_at_source)}</span>
-                </div>
-                <div className={styles.detailRow}>
-                    <span>{t.payslips.insurance}</span>
-                    <span>{fmt(payslip.insurance)}</span>
-                </div>
-                {payslip.other_deductions > 0 && (
-                    <div className={styles.detailRow}>
-                        <span>{t.payslips.otherDeductions}</span>
-                        <span>{fmt(payslip.other_deductions)}</span>
-                    </div>
-                )}
-                <div className={styles.detailRowTotal}>
-                    <span>{t.payslips.totalDeductions}</span>
-                    <span>{fmt(payslip.total_deductions)}</span>
-                </div>
-            </div>
-        </div>
-
-        {/* Net Salary Hero */}
-        <div className={styles.netSalarySection}>
-            <div className={styles.netSalaryLeft}>
-                <h3>{t.payslips.netSalary}</h3>
-                <div className={styles.netSalaryAmount}>{fmt(payslip.net_salary)}</div>
-            </div>
-            <div className={styles.netSalaryRight}>
-                <small>{t.payslips.afterDeductions}</small>
-                <span className={styles.netSalaryTakehome}>
-                    {payslip.month_year_display}
-                </span>
-            </div>
-        </div>
-    </div>
-    );
-};
-
 /* ── Main Component ──────────────────────────────────────────────── */
 const PayslipList: React.FC = () => {
     const t = useI18n();
     const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
-    const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+    const [isPdfModalVisible, setIsPdfModalVisible] = useState(false);
+    const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
+    const [pdfLoading, setPdfLoading] = useState(false);
+
+    // Clean up blob URL when modal is closed
+    useEffect(() => {
+        if (!isPdfModalVisible && pdfBlobUrl) {
+            URL.revokeObjectURL(pdfBlobUrl);
+            setPdfBlobUrl(null);
+        }
+    }, [isPdfModalVisible]);
 
     const { data: payslips, isLoading, error } = useQuery({
         queryKey: ['payslips'],
@@ -131,9 +57,21 @@ const PayslipList: React.FC = () => {
         staleTime: 1000 * 60 * 5,
     });
 
-    const handleViewDetails = (payslip: Payslip) => {
+    const handleViewPDF = async (payslip: Payslip) => {
         setSelectedPayslip(payslip);
-        setIsDetailModalVisible(true);
+        setIsPdfModalVisible(true);
+        setPdfLoading(true);
+        try {
+            const path = payslipService.getGeneratePdfPath(payslip.id);
+            const response = await api.get(path, { responseType: 'blob' });
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            setPdfBlobUrl(URL.createObjectURL(blob));
+        } catch {
+            message.error('Không thể tải phiếu lương PDF.');
+            setIsPdfModalVisible(false);
+        } finally {
+            setPdfLoading(false);
+        }
     };
 
     const handleDownloadPDF = async (payslip: Payslip) => {
@@ -216,9 +154,9 @@ const PayslipList: React.FC = () => {
                 <div style={{ display: 'flex', gap: 8 }}>
                     <button
                         className={`${styles.actionBtn} ${styles.actionBtnPrimary}`}
-                        onClick={() => handleViewDetails(record)}
+                        onClick={() => handleViewPDF(record)}
                     >
-                        <EyeOutlined style={{ fontSize: 12 }} />
+                        <FilePdfOutlined style={{ fontSize: 12 }} />
                         {t.requests.btnView}
                     </button>
                     {record.pdf_file && (
@@ -317,53 +255,58 @@ const PayslipList: React.FC = () => {
                 </div>
             )}
 
-            {/* ── Detail Modal ─────────────────────────────── */}
+            {/* ── PDF Viewer Modal ─────────────────────────── */}
             <Modal
                 title={
                     <span style={{
                         fontFamily: 'Manrope, sans-serif',
                         fontWeight: 800,
-                        fontSize: "17px",
+                        fontSize: '17px',
                         letterSpacing: '-0.02em',
                     }}>
-                        {t.payslips.detailTitle}
+                        <FilePdfOutlined style={{ marginRight: 8, color: '#e74c3c' }} />
+                        Phiếu lương — {selectedPayslip?.month_year_display}
                     </span>
                 }
-                open={isDetailModalVisible}
-                onCancel={() => setIsDetailModalVisible(false)}
-                width={740}
-                styles={{
-                    body: { padding: '20px 24px 24px' },
-                    header: {
-                        borderBottom: '1px solid var(--brand-gray-100)',
-                        padding: '18px 24px',
-                    },
-                    footer: {
-                        borderTop: '1px solid var(--brand-gray-100)',
-                        padding: '14px 24px',
-                    },
-                }}
+                open={isPdfModalVisible}
+                onCancel={() => setIsPdfModalVisible(false)}
+                width="90vw"
+                style={{ maxWidth: 960, top: 20 }}
+                styles={{ body: { padding: 0, height: '80vh' } }}
                 footer={
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
                         <button
                             className={`${styles.modalFooterBtn} ${styles.modalFooterBtnClose}`}
-                            onClick={() => setIsDetailModalVisible(false)}
+                            onClick={() => setIsPdfModalVisible(false)}
                         >
                             {t.payslips.btnClose}
                         </button>
-                        {selectedPayslip?.pdf_file && (
-                            <button
+                        {pdfBlobUrl && (
+                            <a
+                                href={pdfBlobUrl}
+                                download={`Phieu_luong_${selectedPayslip?.month_year_display?.replace('/', '_')}.pdf`}
                                 className={`${styles.modalFooterBtn} ${styles.modalFooterBtnDownload}`}
-                                onClick={() => selectedPayslip && handleDownloadPDF(selectedPayslip)}
                             >
-                                <DownloadOutlined />
-                                {t.payslips.btnDownloadPdf}
-                            </button>
+                                <DownloadOutlined style={{ marginRight: 4 }} />
+                                Tải xuống
+                            </a>
                         )}
                     </div>
                 }
+                destroyOnClose
             >
-                {selectedPayslip && <PayslipDetails payslip={selectedPayslip} />}
+                {pdfLoading && (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                        <Spin size="large" tip="Đang tải phiếu lương..." />
+                    </div>
+                )}
+                {pdfBlobUrl && !pdfLoading && (
+                    <iframe
+                        src={pdfBlobUrl}
+                        style={{ width: '100%', height: '100%', border: 'none' }}
+                        title="Phiếu lương PDF"
+                    />
+                )}
             </Modal>
 
         </div>
